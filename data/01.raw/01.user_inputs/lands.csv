@@ -1,0 +1,9 @@
+﻿land_id,owner_id,area_m2,zone_type,soil_capacity,distance_port_km,power_available_kw,road_access,flood_risk,terrain_ready_score
+L001,O001,6000,Industrial,Alta,4.2,1000,Directo,Bajo,82
+L002,O002,15000,Logístico,Media,2.8,700,Directo,Medio,75
+L003,O003,4000,Mixto,Alta,6.5,500,Parcial,Bajo,68
+L004,O001,10000,Industrial,Alta,3.5,1200,Directo,Bajo,88
+L005,O004,8000,Industrial,Media,5,900,Parcial,Medio,70
+L006,O005,20000,Logístico,Alta,1.9,1500,Directo,Bajo,90
+L007,O002,5500,Mixto,Media,7.2,600,Parcial,Bajo,65
+L008,O003,3000,Industrial,Alta,4.9,450,Directo,Bajo,78

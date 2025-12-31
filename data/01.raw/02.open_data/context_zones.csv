@@ -1,0 +1,4 @@
+﻿zone_id,zone_name,avg_energy_cost,labor_index,logistics_score,climate_risk
+Z01,Chancay Norte,0.11,Media,Alta,Bajo
+Z02,Chancay Centro,0.12,Alta,Muy Alta,Bajo
+Z03,Chancay Sur,0.1,Media,Media,Medio

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Chancay Hub - Registro Propietario</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1152d4",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body>
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden font-display">
+<div class="absolute inset-0 z-0 opacity-5 pointer-events-none" style="background-image: radial-gradient(#1152d4 1px, transparent 1px); background-size: 32px 32px;">
+</div>
+<div class="layout-container flex h-full grow flex-col z-10 relative">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-10 py-4 sticky top-0 z-50">
+<div class="flex items-center gap-4 text-gray-900 dark:text-white">
+<div class="size-8 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-size: 32px;">anchor</span>
+</div>
+<h2 class="text-gray-900 dark:text-white text-xl font-bold leading-tight tracking-tight">Chancay Hub</h2>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<div class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-gray-300">
+<a class="hover:text-primary transition-colors" href="#">Ayuda</a>
+<a class="hover:text-primary transition-colors" href="#">Contacto</a>
+</div>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white text-sm font-bold transition-colors">
+<span class="truncate">Iniciar Sesión</span>
+</button>
+</div>
+</header>
+<main class="flex flex-1 justify-center py-12 px-4 md:px-10">
+<div class="layout-content-container flex flex-col max-w-[800px] flex-1 gap-8">
+<div class="flex flex-col gap-4 text-center items-center animate-fade-in-up">
+<div class="inline-flex items-center gap-2 rounded-full bg-blue-50 dark:bg-blue-900/30 px-3 py-1 text-primary dark:text-blue-300 mb-2">
+<span class="material-symbols-outlined text-sm">landscape</span>
+<span class="text-xs font-bold uppercase tracking-wide">Perfil Propietario</span>
+</div>
+<h1 class="text-gray-900 dark:text-white text-3xl md:text-4xl font-black leading-tight tracking-tight">
+                        Registro de Propietario de Terreno
+                    </h1>
+<p class="text-gray-500 dark:text-gray-400 text-lg font-normal leading-normal max-w-2xl">
+                        Complete el formulario con la información de su propiedad para unirse a la red de oportunidades de Chancay Hub.
+                    </p>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+<div class="p-6 md:p-8 flex flex-col gap-8">
+<div class="flex flex-col gap-5">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 pb-2">
+                                Información Personal
+                            </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+<div class="flex flex-col gap-2 md:col-span-2">
+<label class="text-sm font-medium text-gray-700 dark:text-gray-300" for="fullname">Nombre Completo</label>
+<input class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white p-3 text-sm focus:border-primary focus:ring-primary focus:outline-none transition-colors" id="fullname" placeholder="Ingrese su nombre completo" type="text"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium text-gray-700 dark:text-gray-300" for="email">Correo Electrónico</label>
+<input class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white p-3 text-sm focus:border-primary focus:ring-primary focus:outline-none transition-colors" id="email" placeholder="ejemplo@correo.com" type="email"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium text-gray-700 dark:text-gray-300" for="phone">Teléfono Móvil</label>
+<input class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white p-3 text-sm focus:border-primary focus:ring-primary focus:outline-none transition-colors" id="phone" placeholder="+51 999 999 999" type="tel"/>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-5">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 pb-2">
+                                Detalles del Terreno
+                            </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+<div class="flex flex-col gap-2 md:col-span-2">
+<label class="text-sm font-medium text-gray-700 dark:text-gray-300" for="location">Ubicación / Dirección</label>
+<input class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white p-3 text-sm focus:border-primary focus:ring-primary focus:outline-none transition-colors" id="location" placeholder="Ej. Carretera Panamericana Norte Km 80, Chancay" type="text"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium text-gray-700 dark:text-gray-300" for="size">Área Total</label>
+<div class="relative">
+<input class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white p-3 pr-10 text-sm focus:border-primary focus:ring-primary focus:outline-none transition-colors" id="size" placeholder="0" type="number"/>
+<span class="absolute right-3 top-3 text-gray-500 text-sm">m²</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium text-gray-700 dark:text-gray-300" for="type">Tipo de Terreno</label>
+<select class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white p-3 text-sm focus:border-primary focus:ring-primary focus:outline-none transition-colors appearance-none" id="type">
+<option disabled="" selected="" value="">Seleccione una opción</option>
+<option value="industrial">Industrial</option>
+<option value="agricola">Agrícola</option>
+<option value="urbano">Urbano</option>
+<option value="eriazo">Eriazo</option>
+</select>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-5">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 pb-2">
+                                Documentación Legal (Opcional)
+                            </h3>
+<div class="flex justify-center rounded-lg border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 px-6 py-10 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group">
+<div class="text-center">
+<span class="material-symbols-outlined mx-auto h-12 w-12 text-gray-400 group-hover:text-primary transition-colors">cloud_upload</span>
+<div class="mt-4 flex text-sm leading-6 text-gray-600 dark:text-gray-400 justify-center">
+<label class="relative cursor-pointer rounded-md bg-transparent font-semibold text-primary focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 hover:text-blue-700" for="file-upload">
+<span>Subir archivo</span>
+<input class="sr-only" id="file-upload" name="file-upload" type="file"/>
+</label>
+<p class="pl-1">o arrastrar y soltar</p>
+</div>
+<p class="text-xs leading-5 text-gray-500 dark:text-gray-500 mt-2">PDF, JPG o PNG hasta 10MB (Partida Registral, Título, etc.)</p>
+</div>
+</div>
+</div>
+<div class="pt-4">
+<button class="w-full flex items-center justify-center rounded-lg bg-primary hover:bg-blue-700 text-white font-bold text-base h-12 shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-0.5">
+                                Registrar Terreno
+                                <span class="material-symbols-outlined ml-2 text-xl">arrow_forward</span>
+</button>
+<p class="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
+                                Al registrarte, aceptas nuestros <a class="underline hover:text-primary" href="#">Términos y Condiciones</a> y <a class="underline hover:text-primary" href="#">Política de Privacidad</a>.
+                            </p>
+</div>
+</div>
+</div>
+<div class="flex px-4 py-2 justify-center">
+<button class="group flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-6 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm font-bold leading-normal transition-colors">
+<span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+<span class="truncate">Volver a selección</span>
+</button>
+</div>
+</div>
+</main>
+</div>
+<img alt="Blurred industrial shipping container texture" aria-hidden="true" class="fixed top-0 left-0 w-full h-full object-cover opacity-[0.03] pointer-events-none z-0 mix-blend-multiply dark:mix-blend-overlay filter blur-sm" data-alt="Blurred industrial port background with blue tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFPwE4iphA4SZPllFq5Cj-fP0ZdWMNpli_jSQ_PRqEoWQI2I9bwsJHTh8L8am69Bo9PxJ7TH_zJVAeSrSwrHeRj1c3mnKLkdIc9wA5q1h08AfWRPXGz2t5TwDN9vGlfLT5LbczNvrgD6K0CzTZzy79NZf6skGUOomkQ4MaepNF3vMEoz22mIhRE5Rx-Vcu9FG-nfELxjxELbt6Wg3uawSFq9m-tL5QSMMDZN8jqFhuVYanv1WUXduGf0EamuqeRl5VXxsfK4bT8_MK"/>
+</div>
+
+</body></html>

@@ -9,3 +9,5 @@ Estado actual del proyecto
 - Se cuenta con múltiples vistas HTML funcionales que representan los principales flujos de la plataforma (exploración, matching, simulación y soporte).
 - La integración completa entre vistas y la lógica backend se encuentra en desarrollo.
 - La capa analítica está estructurada para evolucionar por niveles, permitiendo prototipos demostrables desde fases tempranas.
+
+<img width="1896" height="1017" alt="image" src="https://github.com/user-attachments/assets/e2799260-3715-433f-9fc2-0c549907e97b" />

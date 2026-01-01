@@ -32,24 +32,30 @@ def score_company_land(company, land, weights):
     else:
         use_case_fit = 0.4
 
-    # --- 4. Infrastructure fit ---
-    power_fit = 1.0 if land["power_available_kw"] >= company["power_demand_kw"] else 0.6
+    # --- 4. Technical fit --- 
+    if land["flood_risk"] == "bajo":
+        flood_risk = 1.0 
+    elif land["flood_risk"] == "medio":
+        flood_risk = 0.6
+    else: 0.1  
     road_fit = 1.0 if land["road_access"] == "Directo" else 0.7
+    power_fit = 1.0 if land["power_available_kw"] >= company["power_demand_kw"] else 0.6
 
-    infrastructure_fit = round((power_fit + road_fit) / 2, 2)
+
+    technical_fit = round((power_fit + road_fit + flood_risk) / 3, 2) #cambiar en función a cantidad de parámetros
 
     # --- Score final ponderado ---
     final_score = (
         zone_fit * weights["zone_fit"] +
         area_fit * weights["area_fit"] +
         use_case_fit * weights["use_case_fit"] +
-        infrastructure_fit * weights["infrastructure_fit"]
+        technical_fit * weights["technical_fit"]
     )
 
     return {
         "zone_fit": round(zone_fit, 2),
         "area_fit": round(area_fit, 2),
         "use_case_fit": round(use_case_fit, 2),
-        "infrastructure_fit": round(infrastructure_fit, 2),
+        "technical_fit": round(technical_fit, 2),
         "final_score": round(final_score * 100, 1)
     }

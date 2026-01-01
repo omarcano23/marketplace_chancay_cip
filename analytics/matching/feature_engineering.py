@@ -20,6 +20,7 @@ def build_land_features(lands_df, context_df):
 
     df["area_m2"] = df["area_m2"].fillna(0)
     df["zone_type"] = df["zone_type"].str.lower()
+    df["flood_risk"] = df["flood_risk"].str.lower()
 
     # merge simple con data abierta (si existe)
     if "zone_id" in df.columns and "zone_id" in context_df.columns:

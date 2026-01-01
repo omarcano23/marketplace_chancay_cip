@@ -1,9 +1,9 @@
-﻿company_id,company_name,sector,activity_type,space_required_m2,power_demand_kw,logistics_intensity,export_focus,setup_time_months,employment_scale,preferred_zone
-C001,Pacific Tech Ltd,Tecnología,Ensamblaje,5000,800,Media,Alta,6,Media,Industrial
-C002,Andean Foods SAC,Agroindustria,Procesamiento,3000,450,Alta,Media,4,Alta,Industrial
-C003,OceanLog Global,Logística,Almacenaje,12000,600,Muy Alta,Alta,3,Media,Logístico
-C004,GreenPlast Industries,Manufactura,Plásticos,7000,950,Media,Media,8,Alta,Industrial
-C005,SinoTrade Perú,Comercio,Distribución,9000,300,Alta,Alta,2,Baja,Logístico
-C006,AndeanSteel SAC,Metalmecánica,Fabricación,14000,1200,Media,Baja,10,Alta,Industrial
-C007,ColdChain Express,Logística,Frío industrial,6000,850,Muy Alta,Alta,5,Media,Logístico
-C008,BioExport Perú,Agroindustria,Empaque,4000,400,Media,Muy Alta,4,Media,Mixto
+﻿company_id,company_name,sector,activity_type,space_required_m2,power_demand_kw,logistics_intensity,export_focus,employment_scale,preferred_zone
+C001,Pacific Tech Ltd,Tecnología,Ensamblaje,5000,800,Media,Alta,Media,Industrial
+C002,Andean Foods SAC,Agroindustria,Procesamiento,3000,450,Alta,Media,Alta,Industrial
+C003,OceanLog Global,Logística,Almacenaje,12000,600,Muy Alta,Alta,Media,Logístico
+C004,GreenPlast Industries,Manufactura,Plásticos,7000,950,Media,Media,Alta,Industrial
+C005,SinoTrade Perú,Comercio,Distribución,9000,300,Alta,Alta,Baja,Logístico
+C006,AndeanSteel SAC,Metalmecánica,Fabricación,14000,1200,Media,Baja,Alta,Industrial
+C007,ColdChain Express,Logística,Frío industrial,6000,850,Muy Alta,Alta,Media,Logístico
+C008,BioExport Perú,Agroindustria,Empaque,4000,400,Media,Muy Alta,Media,Mixto

@@ -1,0 +1,8 @@
+﻿provider_id,service_type,certification,location_km,capacity_score,cip_registered,sector_focus
+P001,Estructuras metálicas,Sí,12,Alta,Sí,Industria
+P002,Limpieza industrial,No,8,Media,No,General
+P003,Logística local,Sí,5,Alta,Sí,Logística
+P004,Electricidad industrial,Sí,10,Alta,Sí,Energía
+P005,Obras civiles,Sí,15,Media,Sí,Construcción
+P006,Refrigeración industrial,No,7,Media,No,Alimentos
+P007,Seguridad industrial,Sí,9,Alta,Sí,General

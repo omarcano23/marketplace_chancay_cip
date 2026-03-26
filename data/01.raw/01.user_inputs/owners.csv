@@ -1,0 +1,6 @@
+﻿owner_id,owner_type,leasing_allowed,min_contract_years,services_included,price_usd_m2,flexibility_score
+O001,Privado,Sí,10,"Seguridad, Mantenimiento",45,Alta
+O002,Consorcio,Sí,15,"Energía, Agua, Seguridad",60,Media
+O003,Privado,No,5,Ninguno,38,Baja
+O004,Empresa,Sí,8,Seguridad,42,Media
+O005,Fondo Inv.,Sí,20,"Energía, Agua, Vías",70,Baja

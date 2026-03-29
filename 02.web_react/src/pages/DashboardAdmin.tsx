@@ -2,25 +2,33 @@ import Layout from '../components/Layout';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAdminSidebarProps } from '../components/AdminSidebarConfig';
+import { fetchAllUsers } from '../lib/authProfile';
+import { useAppProfile } from '../hooks/useAppProfile';
 
 const DashboardAdmin = () => {
   const navigate = useNavigate();
-  const [adminUser, setAdminUser] = useState<any>(null);
+  const { isLoaded, isSignedIn, loadingProfile, profile: adminUser } = useAppProfile();
   const [allUsers, setAllUsers] = useState<any[]>([]);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (!savedUser || JSON.parse(savedUser).role !== 'admin') {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
       navigate('/login');
       return;
     }
-    setAdminUser(JSON.parse(savedUser));
-    fetch('http://localhost:4001/api/users')
-      .then(res => res.json())
-      .then(data => setAllUsers(data.data || []));
-  }, [navigate]);
+    if (loadingProfile) return;
+    if (!adminUser) {
+      navigate('/registro');
+      return;
+    }
+    if (adminUser.role !== 'admin') {
+      navigate(`/dashboard/${adminUser.role}`);
+      return;
+    }
+    fetchAllUsers().then(setAllUsers);
+  }, [isLoaded, isSignedIn, loadingProfile, adminUser, navigate]);
 
-  if (!adminUser) return null;
+  if (!isLoaded || loadingProfile || !adminUser) return null;
 
   return (
     <Layout sidebarProps={getAdminSidebarProps('dashboard', adminUser.fullname)} currentPathLabel="Resumen Global">

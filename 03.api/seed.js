@@ -1,8 +1,16 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const { Pool } = require('pg');
 
-const dbPath = path.resolve(__dirname, 'marketplace.db');
-const db = new sqlite3.Database(dbPath);
+const DATABASE_URL = process.env.DATABASE_URL;
+
+if (!DATABASE_URL) {
+  console.error('Missing DATABASE_URL. Set your Supabase Postgres connection string before running seed.');
+  process.exit(1);
+}
+
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+  ssl: DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized: false },
+});
 
 const mockUsers = [
   {
@@ -11,7 +19,7 @@ const mockUsers = [
     email: 'admin@chancay.com',
     password: 'admin123',
     company_name: 'Chancay Hub Management',
-    industry: 'Administración'
+    industry: 'Administración',
   },
   {
     role: 'empresa',
@@ -23,7 +31,7 @@ const mockUsers = [
     activity_type: 'Distribución de Contenedores Refrigerados',
     space_required: '15000',
     energy_required: '800',
-    location: 'Zona de Actividad Logística (ZAL)'
+    location: 'Zona de Actividad Logística (ZAL)',
   },
   {
     role: 'empresa',
@@ -35,7 +43,7 @@ const mockUsers = [
     activity_type: 'Planta de Procesamiento de Arándanos',
     space_required: '5000',
     energy_required: '300',
-    location: 'Sector Norte'
+    location: 'Sector Norte',
   },
   {
     role: 'propietario',
@@ -46,7 +54,7 @@ const mockUsers = [
     location: 'ZAL Sur, Lote A-12',
     size: '45000',
     type: 'Industrial / Logístico',
-    industry: 'Inmobiliaria'
+    industry: 'Inmobiliaria',
   },
   {
     role: 'propietario',
@@ -57,7 +65,7 @@ const mockUsers = [
     location: 'Sector Norte, Km 82',
     size: '8000',
     type: 'Agroindustrial',
-    industry: 'Inmobiliaria'
+    industry: 'Inmobiliaria',
   },
   {
     role: 'proveedor',
@@ -67,7 +75,7 @@ const mockUsers = [
     company_name: 'Tecnologías Portuarias SAC',
     services: 'Instalación de Grúas y Mantenimiento Eléctrico Industrial',
     experience: '15 años',
-    industry: 'Ingeniería'
+    industry: 'Ingeniería',
   },
   {
     role: 'proveedor',
@@ -77,39 +85,56 @@ const mockUsers = [
     company_name: 'Valdivia & Asociados',
     services: 'Saneamiento Legal de Terrenos y Permisos Ambientales',
     experience: '8 años',
-    industry: 'Legal'
-  }
+    industry: 'Legal',
+  },
 ];
 
-db.serialize(() => {
-  db.run("DROP TABLE IF EXISTS users");
-  db.run(`CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    role TEXT NOT NULL,
-    fullname TEXT,
-    email TEXT UNIQUE,
-    password TEXT,
-    phone TEXT,
-    company_name TEXT,
-    tax_id TEXT,
-    industry TEXT,
-    location TEXT,
-    size TEXT,
-    type TEXT,
-    services TEXT,
-    experience TEXT,
-    activity_type TEXT,
-    space_required TEXT,
-    energy_required TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )`);
+const ensureSchema = async () => {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+      clerk_user_id TEXT UNIQUE,
+      role TEXT NOT NULL,
+      fullname TEXT,
+      email TEXT UNIQUE,
+      password TEXT DEFAULT '123456',
+      phone TEXT,
+      company_name TEXT,
+      tax_id TEXT,
+      industry TEXT,
+      location TEXT,
+      size TEXT,
+      type TEXT,
+      services TEXT,
+      experience TEXT,
+      activity_type TEXT,
+      space_required TEXT,
+      energy_required TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+  await pool.query('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_clerk_user_id ON users(clerk_user_id)');
+};
 
-  mockUsers.forEach(user => {
-    const fields = Object.keys(user);
-    const values = Object.values(user);
-    const placeholders = fields.map(() => '?').join(',');
-    db.run(`INSERT INTO users (${fields.join(',')}) VALUES (${placeholders})`, values);
-  });
-  console.log("Base de datos poblada exitosamente incluyendo al Administrador.");
-});
-db.close();
+const seed = async () => {
+  try {
+    await ensureSchema();
+    await pool.query('TRUNCATE TABLE users RESTART IDENTITY');
+
+    for (const user of mockUsers) {
+      const fields = Object.keys(user);
+      const values = Object.values(user);
+      const placeholders = fields.map((_, idx) => `$${idx + 1}`).join(', ');
+      await pool.query(`INSERT INTO users (${fields.join(',')}) VALUES (${placeholders})`, values);
+    }
+
+    console.log('Base de datos PostgreSQL poblada exitosamente incluyendo al Administrador.');
+  } catch (err) {
+    console.error('Seed error:', err.message);
+    process.exitCode = 1;
+  } finally {
+    await pool.end();
+  }
+};
+
+seed();

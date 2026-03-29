@@ -1,16 +1,31 @@
 import AuthLayout from '../components/AuthLayout';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/react';
+import { saveProfile } from '../lib/authProfile';
+import { useEffect } from 'react';
 
 const RegistroPropietario = () => {
   const navigate = useNavigate();
+  const { isLoaded, isSignedIn, user } = useUser();
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) navigate('/signup');
+  }, [isLoaded, isSignedIn, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSignedIn || !user?.id) {
+      navigate('/signup');
+      return;
+    }
+
     const formData = new FormData(e.target as HTMLFormElement);
     const data = {
+      clerk_user_id: user.id,
       role: 'propietario',
-      fullname: formData.get('fullname'),
-      email: formData.get('email'),
+      fullname: formData.get('fullname') || user.fullName || user.firstName,
+      email: formData.get('email') || user.primaryEmailAddress?.emailAddress,
       phone: formData.get('phone'),
       location: formData.get('location'),
       size: formData.get('size'),
@@ -18,19 +33,15 @@ const RegistroPropietario = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:4001/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (response.ok) {
-        navigate('/dashboard/propietario');
-      }
+      await saveProfile(data);
+      navigate('/dashboard/propietario');
     } catch (error) {
       console.error('Error registering:', error);
       alert('Error al conectar con el servidor');
     }
   };
+
+  if (!isLoaded || !isSignedIn) return null;
 
   return (
     <AuthLayout 

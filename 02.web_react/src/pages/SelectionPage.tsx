@@ -1,8 +1,27 @@
 import { Link, useNavigate } from 'react-router-dom';
 import Chatbot from '../components/Chatbot';
+import { useEffect } from 'react';
+import { getDashboardPath } from '../lib/authProfile';
+import { useAppProfile } from '../hooks/useAppProfile';
+import { Show, UserButton } from '@clerk/react';
 
 const SelectionPage = () => {
   const navigate = useNavigate();
+  const { isLoaded, isSignedIn, loadingProfile, profile } = useAppProfile();
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      navigate('/signup');
+      return;
+    }
+    if (loadingProfile) return;
+    if (profile) {
+      navigate(getDashboardPath(profile.role));
+    }
+  }, [isLoaded, isSignedIn, loadingProfile, profile, navigate]);
+
+  if (!isLoaded || loadingProfile) return null;
 
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden font-display">
@@ -31,9 +50,17 @@ const SelectionPage = () => {
               <a className="hover:text-primary transition-colors" href="#">Ayuda</a>
               <a className="hover:text-primary transition-colors" href="#">Contacto</a>
             </div>
-            <button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white text-sm font-bold transition-colors">
-              <span className="truncate">Iniciar Sesión</span>
-            </button>
+            <Show when="signed-out">
+              <Link to="/login" className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white text-sm font-bold transition-colors">
+                <span className="truncate">Iniciar Sesión</span>
+              </Link>
+            </Show>
+            <Show when="signed-in">
+              <div className="flex items-center gap-3">
+                <UserButton />
+                <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Cuenta activa</span>
+              </div>
+            </Show>
           </div>
         </header>
 

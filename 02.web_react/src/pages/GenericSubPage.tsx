@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { getEmpresaSidebarProps, getPropietarioSidebarProps, getProveedorSidebarProps } from '../components/SidebarConfigs';
+import { useAppProfile } from '../hooks/useAppProfile';
 
 interface GenericSubPageProps {
   tab: string;
@@ -11,23 +12,26 @@ interface GenericSubPageProps {
 
 const GenericSubPage: React.FC<GenericSubPageProps> = ({ tab, role, title }) => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const { isLoaded, isSignedIn, loadingProfile, profile: user } = useAppProfile();
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (!savedUser) {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
       navigate('/login');
       return;
     }
-    const parsedUser = JSON.parse(savedUser);
-    if (parsedUser.role !== role) {
+    if (loadingProfile) return;
+    if (!user) {
+      navigate('/registro');
+      return;
+    }
+    if (user.role !== role) {
       navigate('/');
       return;
     }
-    setUser(parsedUser);
-  }, [navigate, role]);
+  }, [isLoaded, isSignedIn, loadingProfile, user, navigate, role]);
 
-  if (!user) return null;
+  if (!isLoaded || loadingProfile || !user) return null;
 
   let sidebarProps;
   if (role === 'empresa') sidebarProps = getEmpresaSidebarProps(tab, user.fullname, user.company_name);

@@ -1,16 +1,10 @@
-import { useNavigate } from 'react-router-dom';
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/react";
 
 interface HeaderProps {
   currentPathLabel: string;
 }
 
 const Header: React.FC<HeaderProps> = ({ currentPathLabel }) => {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    navigate('/');
-  };
-
   return (
     <header className="h-20 bg-white dark:bg-[#1a202c] border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 flex-shrink-0 z-10">
       <div className="flex items-center gap-2">
@@ -41,13 +35,24 @@ const Header: React.FC<HeaderProps> = ({ currentPathLabel }) => {
           <span className="material-symbols-outlined">help</span>
         </button>
         <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
-        <button 
-          onClick={handleLogout}
-          className="flex items-center gap-2 text-slate-500 hover:text-red-500 transition-colors text-sm font-medium"
-        >
-          <span className="material-symbols-outlined">logout</span>
-          <span>Salir</span>
-        </button>
+        
+        <Show when="signed-out">
+          <div className="flex items-center gap-3">
+            <SignInButton mode="modal">
+              <button className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Iniciar sesión</button>
+            </SignInButton>
+            <SignUpButton mode="modal" forceRedirectUrl="/registro" fallbackRedirectUrl="/registro">
+              <button className="text-sm font-medium bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">Registrarse</button>
+            </SignUpButton>
+          </div>
+        </Show>
+        
+        <Show when="signed-in">
+          <div className="flex items-center gap-3">
+            <UserButton />
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Mi Perfil</span>
+          </div>
+        </Show>
       </div>
     </header>
   );

@@ -2,30 +2,34 @@ import Layout from '../components/Layout';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getEmpresaSidebarProps } from '../components/SidebarConfigs';
+import { fetchMatchesForUser } from '../lib/authProfile';
+import { useAppProfile } from '../hooks/useAppProfile';
 
 const DashboardEmpresa = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const { isLoaded, isSignedIn, loadingProfile, profile: user } = useAppProfile();
   const [matches, setMatches] = useState<any[]>([]);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (!savedUser) {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
       navigate('/login');
       return;
     }
-    const parsedUser = JSON.parse(savedUser);
-    setUser(parsedUser);
+    if (loadingProfile) return;
+    if (!user) {
+      navigate('/registro');
+      return;
+    }
+    if (user.role !== 'empresa') {
+      navigate(`/dashboard/${user.role}`);
+      return;
+    }
 
-    // Fetch matches reales desde la API
-    fetch(`http://localhost:4001/api/matches/${parsedUser.id}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.message === 'success') setMatches(data.data);
-      });
-  }, [navigate]);
+    fetchMatchesForUser(user.id).then(setMatches);
+  }, [isLoaded, isSignedIn, loadingProfile, user, navigate]);
 
-  if (!user) return null;
+  if (!isLoaded || loadingProfile || !user) return null;
 
   return (
     <Layout sidebarProps={getEmpresaSidebarProps('vinculacion', user.fullname, user.company_name)} currentPathLabel="Vinculación">

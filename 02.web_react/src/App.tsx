@@ -15,12 +15,16 @@ import RegistroPropietario from './pages/RegistroPropietario';
 import RegistroEmpresa from './pages/RegistroEmpresa';
 import RegistroProveedor from './pages/RegistroProveedor';
 import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage';
+import PostAuthRedirect from './pages/PostAuthRedirect';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login/*" element={<LoginPage />} />
+        <Route path="/signup/*" element={<SignUpPage />} />
+        <Route path="/post-auth" element={<PostAuthRedirect />} />
         <Route path="/" element={<LandingPage />} />
         <Route path="/mapa" element={<InteractiveMap />} />
         <Route path="/registro" element={<SelectionPage />} />

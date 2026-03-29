@@ -1,33 +1,46 @@
 import AuthLayout from '../components/AuthLayout';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/react';
+import { saveProfile } from '../lib/authProfile';
+import { useEffect } from 'react';
 
 const RegistroProveedor = () => {
   const navigate = useNavigate();
+  const { isLoaded, isSignedIn, user } = useUser();
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) navigate('/signup');
+  }, [isLoaded, isSignedIn, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSignedIn || !user?.id) {
+      navigate('/signup');
+      return;
+    }
+
     const formData = new FormData(e.target as HTMLFormElement);
     const data = {
+      clerk_user_id: user.id,
       role: 'proveedor',
-      fullname: formData.get('fullname'),
+      fullname: formData.get('fullname') || user.fullName || user.firstName,
+      email: user.primaryEmailAddress?.emailAddress,
+      industry: formData.get('profession'),
       services: formData.get('services'),
       experience: formData.get('experience')
     };
 
     try {
-      const response = await fetch('http://localhost:4001/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (response.ok) {
-        navigate('/dashboard/proveedor');
-      }
+      await saveProfile(data);
+      navigate('/dashboard/proveedor');
     } catch (error) {
       console.error('Error registering:', error);
       alert('Error al conectar con el servidor');
     }
   };
+
+  if (!isLoaded || !isSignedIn) return null;
 
   return (
     <AuthLayout 

@@ -1,22 +1,30 @@
 import Layout from '../components/Layout';
 import type { NavItemProps } from '../components/Sidebar';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAppProfile } from '../hooks/useAppProfile';
 
 const DashboardProveedor = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const { isLoaded, isSignedIn, loadingProfile, profile: user } = useAppProfile();
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (!savedUser) {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
       navigate('/login');
       return;
     }
-    setUser(JSON.parse(savedUser));
-  }, [navigate]);
+    if (loadingProfile) return;
+    if (!user) {
+      navigate('/registro');
+      return;
+    }
+    if (user.role !== 'proveedor') {
+      navigate(`/dashboard/${user.role}`);
+    }
+  }, [isLoaded, isSignedIn, loadingProfile, user, navigate]);
 
-  if (!user) return null;
+  if (!isLoaded || loadingProfile || !user) return null;
 
   const sidebarProps = {
     role: 'Proveedor' as const,

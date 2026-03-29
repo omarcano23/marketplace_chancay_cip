@@ -1,22 +1,30 @@
 import Layout from '../components/Layout';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAdminSidebarProps } from '../components/AdminSidebarConfig';
+import { useAppProfile } from '../hooks/useAppProfile';
 
 const AdminSettings = () => {
   const navigate = useNavigate();
-  const [adminUser, setAdminUser] = useState<any>(null);
+  const { isLoaded, isSignedIn, loadingProfile, profile: adminUser } = useAppProfile();
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (!savedUser || JSON.parse(savedUser).role !== 'admin') {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
       navigate('/login');
       return;
     }
-    setAdminUser(JSON.parse(savedUser));
-  }, [navigate]);
+    if (loadingProfile) return;
+    if (!adminUser) {
+      navigate('/registro');
+      return;
+    }
+    if (adminUser.role !== 'admin') {
+      navigate(`/dashboard/${adminUser.role}`);
+    }
+  }, [isLoaded, isSignedIn, loadingProfile, adminUser, navigate]);
 
-  if (!adminUser) return null;
+  if (!isLoaded || loadingProfile || !adminUser) return null;
 
   return (
     <Layout sidebarProps={getAdminSidebarProps('settings', adminUser.fullname)} currentPathLabel="Configuración">

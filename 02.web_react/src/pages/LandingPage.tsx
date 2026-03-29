@@ -24,7 +24,7 @@ const LandingPage = () => {
               Iniciar Sesión
             </Link>
             <Link
-              to="/registro"
+              to="/signup"
               className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-6 bg-primary hover:bg-blue-700 transition-colors text-white text-sm font-bold leading-normal tracking-[0.015em] shadow-md hover:shadow-lg"
             >
               <span className="truncate">Registrarse</span>
@@ -54,7 +54,7 @@ const LandingPage = () => {
               </h2>
               <div className="flex flex-col sm:flex-row gap-4 mt-4 justify-center md:justify-start">
                 <Link
-                  to="/registro"
+                  to="/signup"
                   className="flex min-w-[160px] cursor-pointer items-center justify-center rounded-lg h-12 px-8 bg-primary hover:bg-blue-600 text-white text-base font-bold transition-all shadow-lg hover:shadow-primary/50"
                 >
                   <span>Comenzar Ahora</span>
@@ -159,7 +159,7 @@ const LandingPage = () => {
                 <p className="text-blue-100 text-lg">Únete hoy a la comunidad empresarial más dinámica de la costa del Pacífico.</p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/registro" className="bg-white text-primary hover:bg-gray-100 font-bold py-3 px-8 rounded-lg shadow-lg transition-transform hover:-translate-y-1 text-center">
+                <Link to="/signup" className="bg-white text-primary hover:bg-gray-100 font-bold py-3 px-8 rounded-lg shadow-lg transition-transform hover:-translate-y-1 text-center">
                   Crear Cuenta Gratis
                 </Link>
                 <button className="bg-transparent border-2 border-white text-white hover:bg-white/10 font-bold py-3 px-8 rounded-lg transition-colors">

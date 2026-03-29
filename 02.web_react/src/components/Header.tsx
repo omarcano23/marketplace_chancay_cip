@@ -1,10 +1,13 @@
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/react";
+import { Show, SignInButton, SignUpButton, UserButton, useUser } from "@clerk/react";
 
 interface HeaderProps {
   currentPathLabel: string;
 }
 
 const Header: React.FC<HeaderProps> = ({ currentPathLabel }) => {
+  const { user } = useUser();
+  const displayName = user?.fullName || user?.primaryEmailAddress?.emailAddress || 'Mi perfil';
+
   return (
     <header className="h-20 bg-white dark:bg-[#1a202c] border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 flex-shrink-0 z-10">
       <div className="flex items-center gap-2">
@@ -50,7 +53,7 @@ const Header: React.FC<HeaderProps> = ({ currentPathLabel }) => {
         <Show when="signed-in">
           <div className="flex items-center gap-3">
             <UserButton />
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Mi Perfil</span>
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{displayName}</span>
           </div>
         </Show>
       </div>

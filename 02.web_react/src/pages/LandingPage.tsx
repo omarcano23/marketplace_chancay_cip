@@ -15,9 +15,9 @@ const LandingPage = () => {
         </div>
         <div className="flex flex-1 justify-end gap-8">
           <div className="hidden md:flex items-center gap-9">
-            <a className="text-[#111318] dark:text-gray-200 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Sobre Nosotros</a>
-            <a className="text-[#111318] dark:text-gray-200 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Servicios</a>
-            <a className="text-[#111318] dark:text-gray-200 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Socios</a>
+            <a className="text-[#111318] dark:text-gray-200 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#sobre-nosotros">Sobre Nosotros</a>
+            <a className="text-[#111318] dark:text-gray-200 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#servicios">Servicios</a>
+            <a className="text-[#111318] dark:text-gray-200 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#socios">Socios</a>
           </div>
           <div className="flex items-center gap-4">
             <Link to="/login" className="text-sm font-bold text-gray-700 dark:text-gray-300 hover:text-primary transition-colors px-4">
@@ -72,7 +72,7 @@ const LandingPage = () => {
         </section>
 
         {/* Partners section */}
-        <div className="w-full bg-white dark:bg-[#151c2b] border-b border-[#e5e7eb] dark:border-gray-800 py-8">
+        <div id="socios" className="w-full bg-white dark:bg-[#151c2b] border-b border-[#e5e7eb] dark:border-gray-800 py-8">
           <div className="max-w-[1200px] mx-auto px-6 md:px-10 flex flex-col items-center gap-6">
             <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Con la confianza de instituciones líderes</p>
             <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
@@ -85,7 +85,7 @@ const LandingPage = () => {
         </div>
 
         {/* Features Section */}
-        <section className="py-20 px-6 md:px-10 lg:px-40 bg-white dark:bg-background-dark">
+        <section id="servicios" className="py-20 px-6 md:px-10 lg:px-40 bg-white dark:bg-background-dark">
           <div className="max-w-[1200px] mx-auto flex flex-col gap-12">
             <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-gray-100 dark:border-gray-800 pb-8">
               <div className="flex flex-col gap-4 max-w-[720px]">
@@ -104,6 +104,15 @@ const LandingPage = () => {
               <FeatureCard icon="monetization_on" title="Para Inversionistas" description="Encuentra oportunidades de inversión de alto impacto en la región con análisis de datos exclusivos del puerto." />
               <FeatureCard icon="engineering" title="Para Proveedores" description="Conecta directamente con grandes proyectos de ingeniería y construcción que requieren tus servicios especializados." />
             </div>
+          </div>
+        </section>
+
+        {/* About section */}
+        <section id="sobre-nosotros" className="py-10 px-6 md:px-10 lg:px-40 bg-[#eef3fb] dark:bg-[#0d121c] border-y border-[#dbe4f4] dark:border-gray-800">
+          <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+            <InfoCard title="Misión" text="Acelerar la conexión entre terrenos, inversión y servicios especializados con decisiones basadas en datos." icon="flag" />
+            <InfoCard title="Visión" text="Consolidar el ecosistema digital de referencia para el desarrollo industrial en torno al Puerto de Chancay." icon="visibility" />
+            <InfoCard title="Enfoque" text="Construcción iterativa MVP-first con autenticación segura, matching explicable y operación escalable." icon="rocket_launch" />
           </div>
         </section>
 
@@ -185,9 +194,21 @@ const LandingPage = () => {
                   Facilitando el comercio y la industria en el nuevo eje portuario de Sudamérica.
                 </p>
               </div>
-              <FooterColumn title="Plataforma" links={['Propiedades', 'Directorio', 'Mapa Interactivo']} />
-              <FooterColumn title="Compañía" links={['Sobre Nosotros', 'Carreras', 'Blog']} />
-              <FooterColumn title="Legal" links={['Privacidad', 'Términos', 'Cookies']} />
+              <FooterColumn title="Plataforma" links={[
+                { label: 'Propiedades', to: '/info/propiedades' },
+                { label: 'Directorio', to: '/info/directorio' },
+                { label: 'Mapa Interactivo', to: '/mapa' },
+              ]} />
+              <FooterColumn title="Compañía" links={[
+                { label: 'Sobre Nosotros', to: '#sobre-nosotros' },
+                { label: 'Carreras', to: '/info/carreras' },
+                { label: 'Blog', to: '/info/blog' },
+              ]} />
+              <FooterColumn title="Legal" links={[
+                { label: 'Privacidad', to: '/info/privacidad' },
+                { label: 'Términos', to: '/info/terminos' },
+                { label: 'Cookies', to: '/info/cookies' },
+              ]} />
             </div>
             <div className="h-px bg-[#f0f2f4] dark:bg-gray-800 w-full"></div>
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
@@ -238,11 +259,29 @@ const ListItem = ({ text }: { text: string }) => (
   </li>
 );
 
-const FooterColumn = ({ title, links }: { title: string; links: string[] }) => (
+const InfoCard = ({ title, text, icon }: { title: string; text: string; icon: string }) => (
+  <article className="rounded-xl bg-white dark:bg-[#1a2230] border border-slate-200 dark:border-slate-700 p-6 flex flex-col gap-3 shadow-sm">
+    <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+      <span className="material-symbols-outlined">{icon}</span>
+    </div>
+    <h3 className="text-lg font-bold text-slate-900 dark:text-white">{title}</h3>
+    <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{text}</p>
+  </article>
+);
+
+const FooterColumn = ({ title, links }: { title: string; links: Array<{ label: string; to: string }> }) => (
   <div className="flex flex-col gap-3">
     <h3 className="text-[#111318] dark:text-white font-bold text-sm uppercase tracking-wide">{title}</h3>
     {links.map((link) => (
-      <a key={link} className="text-[#616f89] dark:text-gray-400 text-sm hover:text-primary transition-colors" href="#">{link}</a>
+      link.to.startsWith('#') ? (
+        <a key={link.label} className="text-[#616f89] dark:text-gray-400 text-sm hover:text-primary transition-colors" href={link.to}>
+          {link.label}
+        </a>
+      ) : (
+        <Link key={link.label} className="text-[#616f89] dark:text-gray-400 text-sm hover:text-primary transition-colors" to={link.to}>
+          {link.label}
+        </Link>
+      )
     ))}
   </div>
 );

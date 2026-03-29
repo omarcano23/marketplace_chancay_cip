@@ -17,6 +17,7 @@ import RegistroProveedor from './pages/RegistroProveedor';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import PostAuthRedirect from './pages/PostAuthRedirect';
+import InfoPage from './pages/InfoPage';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/login/*" element={<LoginPage />} />
         <Route path="/signup/*" element={<SignUpPage />} />
         <Route path="/post-auth" element={<PostAuthRedirect />} />
+        <Route path="/info/:slug" element={<InfoPage />} />
         <Route path="/" element={<LandingPage />} />
         <Route path="/mapa" element={<InteractiveMap />} />
         <Route path="/registro" element={<SelectionPage />} />

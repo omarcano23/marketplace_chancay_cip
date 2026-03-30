@@ -8,6 +8,8 @@ const app = express();
 const PORT = Number(process.env.PORT) || 4001;
 const DATABASE_URL = process.env.DATABASE_URL;
 const CLERK_WEBHOOK_SIGNING_SECRET = process.env.CLERK_WEBHOOK_SIGNING_SECRET;
+const ENABLE_MOCK_USERS = process.env.ENABLE_MOCK_USERS !== 'false';
+const MOCK_USERS_TOTAL = Number(process.env.MOCK_USERS_TOTAL || 50);
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
   .split(',')
   .map((email) => email.trim().toLowerCase())
@@ -125,6 +127,127 @@ const parseClerkFullname = (evtData) => {
   const lastName = evtData?.last_name || '';
   const full = `${firstName} ${lastName}`.trim();
   return full || null;
+};
+
+const MOCK_INDUSTRIES = ['logistica', 'manufactura', 'agroindustrial', 'energia', 'tecnologia', 'inmobiliaria'];
+const MOCK_LOCATIONS = [
+  'Av. Principal 100, Chancay',
+  'Km 82 Panamericana Norte, Chancay',
+  'Sector Industrial Norte, Chancay',
+  'Zona Logística Este, Huaral',
+  'Parque Industrial Central, Chancay',
+];
+const MOCK_SERVICES = [
+  'Consultoría técnica y estudios de prefactibilidad',
+  'Servicios de ingeniería y supervisión de obra',
+  'Logística de almacenamiento y distribución',
+  'Mantenimiento industrial y soporte operativo',
+  'Asesoría legal y estructuración comercial',
+];
+
+const buildMockUser = (index) => {
+  const roleCycle = ['empresa', 'propietario', 'proveedor'];
+  const role = roleCycle[(index - 1) % roleCycle.length];
+  const industry = MOCK_INDUSTRIES[(index - 1) % MOCK_INDUSTRIES.length];
+  const location = MOCK_LOCATIONS[(index - 1) % MOCK_LOCATIONS.length];
+  const services = MOCK_SERVICES[(index - 1) % MOCK_SERVICES.length];
+  const createdAt = new Date(Date.now() - index * 60 * 60 * 1000).toISOString();
+
+  const base = {
+    clerk_user_id: `mock_clerk_${index}`,
+    role,
+    fullname: `Usuario Mock ${index}`,
+    email: `mockuser${index}@chancayhub.local`,
+    password: '123456',
+    phone: `+51999${String(10000 + index).slice(-5)}`,
+    company_name: null,
+    tax_id: null,
+    industry: null,
+    location: null,
+    size: null,
+    type: null,
+    services: null,
+    experience: null,
+    activity_type: null,
+    space_required: null,
+    energy_required: null,
+    created_at: createdAt,
+  };
+
+  if (role === 'empresa') {
+    return {
+      ...base,
+      company_name: `Empresa Mock ${index} SAC`,
+      tax_id: `20${String(100000000 + index).slice(-9)}`,
+      industry,
+      activity_type: `Operación ${industry}`,
+      space_required: String(1500 + index * 20),
+      energy_required: String(80 + index),
+    };
+  }
+
+  if (role === 'propietario') {
+    return {
+      ...base,
+      location,
+      size: String(1000 + index * 35),
+      type: index % 2 === 0 ? 'industrial' : 'logistico',
+      services: 'Terreno disponible para arriendo o alianza',
+    };
+  }
+
+  return {
+    ...base,
+    industry,
+    services,
+    experience: String(2 + (index % 15)),
+  };
+};
+
+const ensureMockUsers = async () => {
+  if (!ENABLE_MOCK_USERS || MOCK_USERS_TOTAL <= 0) return;
+
+  const existingResult = await pool.query(
+    "SELECT COUNT(*)::int AS total FROM users WHERE email LIKE 'mockuser%@chancayhub.local'"
+  );
+  const existing = existingResult.rows[0]?.total || 0;
+  if (existing >= MOCK_USERS_TOTAL) return;
+
+  for (let i = existing + 1; i <= MOCK_USERS_TOTAL; i += 1) {
+    const m = buildMockUser(i);
+    await pool.query(
+      `INSERT INTO users (
+        clerk_user_id, role, fullname, email, password, phone, company_name, tax_id, industry,
+        location, size, type, services, experience, activity_type, space_required, energy_required, created_at
+      ) VALUES (
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,
+        $10,$11,$12,$13,$14,$15,$16,$17,$18
+      )
+      ON CONFLICT (email) DO NOTHING`,
+      [
+        m.clerk_user_id,
+        m.role,
+        m.fullname,
+        m.email,
+        m.password,
+        m.phone,
+        m.company_name,
+        m.tax_id,
+        m.industry,
+        m.location,
+        m.size,
+        m.type,
+        m.services,
+        m.experience,
+        m.activity_type,
+        m.space_required,
+        m.energy_required,
+        m.created_at,
+      ]
+    );
+  }
+
+  console.log(`Mock users ensured: ${MOCK_USERS_TOTAL}`);
 };
 
 app.post('/api/webhooks/clerk', async (req, res) => {
@@ -342,6 +465,7 @@ app.delete('/api/users/:id', async (req, res) => {
 });
 
 initializeDatabase()
+  .then(() => ensureMockUsers())
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);

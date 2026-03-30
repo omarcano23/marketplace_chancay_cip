@@ -30,6 +30,13 @@ const DashboardAdmin = () => {
 
   if (!isLoaded || loadingProfile || !adminUser) return null;
 
+  const empresas = allUsers.filter((u) => u.role === 'empresa').length;
+  const propietarios = allUsers.filter((u) => u.role === 'propietario').length;
+  const proveedores = allUsers.filter((u) => u.role === 'proveedor').length;
+  const recentUsers = [...allUsers]
+    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+    .slice(0, 5);
+
   return (
     <Layout sidebarProps={getAdminSidebarProps('dashboard', adminUser.fullname)} currentPathLabel="Resumen Global">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -46,8 +53,10 @@ const DashboardAdmin = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <QuickStat title="Consultas del Chatbot" value="142" trend="+12% hoy" icon="chat" color="text-emerald-600" />
-            <StatCard title="Matches Exitosos" value="28" icon="handshake" color="text-blue-600" />
+            <QuickStat title="Empresas Registradas" value={empresas} trend={`${Math.round((empresas / Math.max(allUsers.length, 1)) * 100)}% del total`} icon="apartment" color="text-blue-600" />
+            <StatCard title="Propietarios Registrados" value={propietarios} icon="landscape" color="text-emerald-600" />
+            <StatCard title="Proveedores Registrados" value={proveedores} icon="engineering" color="text-orange-600" />
+            <StatCard title="Total de Usuarios" value={allUsers.length} icon="groups" color="text-indigo-600" />
           </div>
         </div>
 
@@ -57,14 +66,40 @@ const DashboardAdmin = () => {
             Actividad Reciente
           </h3>
           <div className="flex flex-col gap-6">
-            <ActivityItem user="Elena Wong" action="Nuevo registro" time="Hace 10 min" type="empresa" />
-            <ActivityItem user="Miguel Torres" action="Actualizó servicios" time="Hace 1 hora" type="proveedor" />
-            <ActivityItem user="Fundo La Querencia" action="Nuevo match" time="Hace 2 horas" type="propietario" />
+            {recentUsers.length === 0 ? (
+              <p className="text-sm text-slate-500">Aún no hay actividad registrada.</p>
+            ) : (
+              recentUsers.map((u) => (
+                <ActivityItem
+                  key={u.id}
+                  user={u.fullname || u.email || `Usuario #${u.id}`}
+                  action={`Nuevo registro (${u.role})`}
+                  time={timeAgo(u.created_at)}
+                  type={u.role}
+                />
+              ))
+            )}
           </div>
         </div>
       </div>
     </Layout>
   );
+};
+
+const timeAgo = (dateValue?: string) => {
+  if (!dateValue) return 'Sin fecha';
+  const diffMs = Date.now() - new Date(dateValue).getTime();
+  if (Number.isNaN(diffMs) || diffMs < 0) return 'Hace un momento';
+
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return 'Hace segundos';
+  if (minutes < 60) return `Hace ${minutes} min`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `Hace ${hours} h`;
+
+  const days = Math.floor(hours / 24);
+  return `Hace ${days} d`;
 };
 
 const QuickStat = ({ title, value, trend, icon, color }: any) => (
@@ -94,7 +129,7 @@ const StatCard = ({ title, value, icon, color }: any) => (
 
 const ActivityItem = ({ user, action, time, type }: any) => (
   <div className="flex gap-4 items-center">
-    <div className={`size-2 rounded-full ${type === 'empresa' ? 'bg-blue-500' : type === 'proveedor' ? 'bg-orange-500' : 'bg-emerald-500'}`}></div>
+    <div className={`size-2 rounded-full ${type === 'empresa' ? 'bg-blue-500' : type === 'proveedor' ? 'bg-orange-500' : type === 'propietario' ? 'bg-emerald-500' : 'bg-indigo-500'}`}></div>
     <div className="flex-1">
       <p className="text-sm font-bold dark:text-white">{user}</p>
       <p className="text-xs text-slate-500">{action}</p>

@@ -18,11 +18,15 @@ export interface AppUserProfile {
   energy_required?: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const DEFAULT_PROD_API_BASE_URL = 'https://deep-data-api-chancayhub.kguo1f.easypanel.host';
+const rawApiBaseUrl = String(import.meta.env.VITE_API_BASE_URL || '').trim();
+const isLoopbackUrl = /(^https?:\/\/)?(localhost|127\.0\.0\.1)(:\d+)?/i.test(rawApiBaseUrl);
 
-if (!API_BASE_URL) {
-  throw new Error('Missing VITE_API_BASE_URL. Define it in your deployment environment variables.');
-}
+const API_BASE_URL = import.meta.env.PROD
+  ? rawApiBaseUrl && !isLoopbackUrl
+    ? rawApiBaseUrl
+    : DEFAULT_PROD_API_BASE_URL
+  : rawApiBaseUrl || 'http://localhost:4001';
 
 export const getDashboardPath = (role: AppRole) => `/dashboard/${role}`;
 

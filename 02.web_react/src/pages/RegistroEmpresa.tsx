@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/react';
 import { saveProfile } from '../lib/authProfile';
 import { useEffect } from 'react';
+import { useAppProfile } from '../hooks/useAppProfile';
 
 const RegistroEmpresa = () => {
   const navigate = useNavigate();
   const { isLoaded, isSignedIn, user } = useUser();
+  const { setProfile } = useAppProfile();
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -35,7 +37,8 @@ const RegistroEmpresa = () => {
     };
 
     try {
-      await saveProfile(data);
+      const profile = await saveProfile(data);
+      setProfile(profile);
       navigate('/dashboard/empresa');
     } catch (error) {
       console.error('Error registering:', error);

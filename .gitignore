@@ -28,3 +28,7 @@ lerna-debug.log*
 
 # Local only
 PROJECT_CONTEXT.md
+.playwright-cli/
+
+# Keep gitignore tracked
+!.gitignore

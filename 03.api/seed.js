@@ -17,7 +17,6 @@ const mockUsers = [
     role: 'admin',
     fullname: 'Admin Chancay Hub',
     email: 'admin@chancay.com',
-    password: 'admin123',
     company_name: 'Chancay Hub Management',
     industry: 'Administración',
   },
@@ -25,7 +24,6 @@ const mockUsers = [
     role: 'empresa',
     fullname: 'Carlos Mendez',
     email: 'empresa@test.com',
-    password: 'password123',
     company_name: 'Logística Andina S.A.',
     industry: 'Transporte Marítimo',
     activity_type: 'Distribución de Contenedores Refrigerados',
@@ -37,7 +35,6 @@ const mockUsers = [
     role: 'empresa',
     fullname: 'Elena Wong',
     email: 'elena@agroexport.com',
-    password: 'password123',
     company_name: 'AgroChancay Export',
     industry: 'Agroindustrial',
     activity_type: 'Planta de Procesamiento de Arándanos',
@@ -49,7 +46,6 @@ const mockUsers = [
     role: 'propietario',
     fullname: 'Jorge Ramirez',
     email: 'propietario@test.com',
-    password: 'password123',
     company_name: 'Fundo La Querencia',
     location: 'ZAL Sur, Lote A-12',
     size: '45000',
@@ -60,7 +56,6 @@ const mockUsers = [
     role: 'propietario',
     fullname: 'Ana María Paz',
     email: 'ana@terrenos.com',
-    password: 'password123',
     company_name: 'Inversiones Paz',
     location: 'Sector Norte, Km 82',
     size: '8000',
@@ -71,7 +66,6 @@ const mockUsers = [
     role: 'proveedor',
     fullname: 'Ing. Miguel Torres',
     email: 'proveedor@test.com',
-    password: 'password123',
     company_name: 'Tecnologías Portuarias SAC',
     services: 'Instalación de Grúas y Mantenimiento Eléctrico Industrial',
     experience: '15 años',
@@ -81,7 +75,6 @@ const mockUsers = [
     role: 'proveedor',
     fullname: 'Sofía Valdivia',
     email: 'sofia@legalport.com',
-    password: 'password123',
     company_name: 'Valdivia & Asociados',
     services: 'Saneamiento Legal de Terrenos y Permisos Ambientales',
     experience: '8 años',
@@ -97,7 +90,6 @@ const ensureSchema = async () => {
       role TEXT NOT NULL,
       fullname TEXT,
       email TEXT UNIQUE,
-      password TEXT DEFAULT '123456',
       phone TEXT,
       company_name TEXT,
       tax_id TEXT,
@@ -114,6 +106,7 @@ const ensureSchema = async () => {
     )
   `);
   await pool.query('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_clerk_user_id ON users(clerk_user_id)');
+  await pool.query('ALTER TABLE public.users DROP COLUMN IF EXISTS password');
 };
 
 const seed = async () => {

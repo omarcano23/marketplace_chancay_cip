@@ -31,7 +31,6 @@ const PROFILE_FIELDS = [
   'role',
   'fullname',
   'email',
-  'password',
   'phone',
   'company_name',
   'tax_id',
@@ -67,7 +66,6 @@ const initializeDatabase = async () => {
       role TEXT NOT NULL,
       fullname TEXT,
       email TEXT UNIQUE,
-      password TEXT DEFAULT '123456',
       phone TEXT,
       company_name TEXT,
       tax_id TEXT,
@@ -84,6 +82,21 @@ const initializeDatabase = async () => {
     )
   `);
   await pool.query('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_clerk_user_id ON users(clerk_user_id)');
+  await pool.query('ALTER TABLE public.users DROP COLUMN IF EXISTS password');
+  await pool.query('ALTER TABLE public.users ENABLE ROW LEVEL SECURITY');
+  await pool.query('REVOKE ALL ON TABLE public.users FROM PUBLIC');
+  await pool.query(`
+    DO $$
+    BEGIN
+      IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+        EXECUTE 'REVOKE ALL ON TABLE public.users FROM anon';
+      END IF;
+      IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+        EXECUTE 'REVOKE ALL ON TABLE public.users FROM authenticated';
+      END IF;
+    END
+    $$;
+  `);
   console.log('Connected to PostgreSQL and schema initialized.');
 };
 
@@ -158,7 +171,6 @@ const buildMockUser = (index) => {
     role,
     fullname: `Usuario Mock ${index}`,
     email: `mockuser${index}@chancayhub.local`,
-    password: '123456',
     phone: `+51999${String(10000 + index).slice(-5)}`,
     company_name: null,
     tax_id: null,
@@ -217,11 +229,11 @@ const ensureMockUsers = async () => {
     const m = buildMockUser(i);
     await pool.query(
       `INSERT INTO users (
-        clerk_user_id, role, fullname, email, password, phone, company_name, tax_id, industry,
+        clerk_user_id, role, fullname, email, phone, company_name, tax_id, industry,
         location, size, type, services, experience, activity_type, space_required, energy_required, created_at
       ) VALUES (
-        $1,$2,$3,$4,$5,$6,$7,$8,$9,
-        $10,$11,$12,$13,$14,$15,$16,$17,$18
+        $1,$2,$3,$4,$5,$6,$7,$8,
+        $9,$10,$11,$12,$13,$14,$15,$16,$17
       )
       ON CONFLICT (email) DO NOTHING`,
       [
@@ -229,7 +241,6 @@ const ensureMockUsers = async () => {
         m.role,
         m.fullname,
         m.email,
-        m.password,
         m.phone,
         m.company_name,
         m.tax_id,
@@ -388,21 +399,6 @@ app.post('/api/profile', async (req, res) => {
     const insertResult = await pool.query(`${sql} RETURNING id`, values);
     const createdUser = await getUserById(insertResult.rows[0].id);
     return res.json({ message: 'success', data: createdUser });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// Endpoint de Login
-app.post('/api/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const result = await pool.query('SELECT * FROM users WHERE email = $1 AND password = $2', [email, password]);
-    const user = result.rows[0];
-    if (!user) {
-      return res.status(401).json({ error: 'Credenciales inválidas' });
-    }
-    res.json({ message: 'success', user });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

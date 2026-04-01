@@ -39,17 +39,17 @@ const DashboardAdmin = () => {
 
   return (
     <Layout sidebarProps={getAdminSidebarProps('dashboard', adminUser.fullname)} currentPathLabel="Resumen Global">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
         <div className="md:col-span-2 flex flex-col gap-8">
-          <div className="bg-gradient-to-r from-primary to-blue-600 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
+          <div className="bg-gradient-to-r from-primary to-blue-600 rounded-2xl p-5 md:p-8 text-white shadow-lg relative overflow-hidden">
             <div className="relative z-10">
-              <h2 className="text-3xl font-bold mb-2">Bienvenido al Centro de Control</h2>
-              <p className="opacity-90 max-w-md">El Puerto de Chancay está creciendo. Tienes {allUsers.length} perfiles activos esperando vinculación.</p>
-              <button onClick={() => navigate('/dashboard/admin/users')} className="mt-6 bg-white text-primary px-6 py-2 rounded-lg font-bold text-sm shadow-sm hover:bg-slate-50 transition-colors">
+              <h2 className="text-2xl md:text-3xl font-bold mb-2">Bienvenido al Centro de Control</h2>
+              <p className="opacity-90 max-w-md text-sm md:text-base">El Puerto de Chancay está creciendo. Tienes {allUsers.length} perfiles activos esperando vinculación.</p>
+              <button onClick={() => navigate('/dashboard/admin/users')} className="mt-4 md:mt-6 bg-white text-primary px-4 md:px-6 py-2 rounded-lg font-bold text-sm shadow-sm hover:bg-slate-50 transition-colors">
                 Gestionar Usuarios
               </button>
             </div>
-            <span className="material-symbols-outlined absolute right-[-20px] bottom-[-20px] text-[200px] opacity-10 rotate-12">hub</span>
+            <span className="material-symbols-outlined absolute right-[-10px] md:right-[-20px] bottom-[-10px] md:bottom-[-20px] text-[120px] md:text-[200px] opacity-10 rotate-12">hub</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

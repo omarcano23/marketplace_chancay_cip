@@ -1,34 +1,71 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const helmet = require('helmet');
+const rateLimitPkg = require('express-rate-limit');
+const { z } = require('zod');
 const { Pool } = require('pg');
 const { Webhook } = require('svix');
+const { clerkMiddleware, getAuth, clerkClient } = require('@clerk/express');
 
 const app = express();
+app.disable('x-powered-by');
+const rateLimit = rateLimitPkg.rateLimit || rateLimitPkg;
+
 const PORT = Number(process.env.PORT) || 4001;
 const DATABASE_URL = process.env.DATABASE_URL;
+const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
+const CLERK_PUBLISHABLE_KEY = process.env.CLERK_PUBLISHABLE_KEY;
 const CLERK_WEBHOOK_SIGNING_SECRET = process.env.CLERK_WEBHOOK_SIGNING_SECRET;
-const ENABLE_MOCK_USERS = process.env.ENABLE_MOCK_USERS !== 'false';
+const TRUST_PROXY = process.env.TRUST_PROXY;
+const ENABLE_MOCK_USERS =
+  process.env.ENABLE_MOCK_USERS === 'true' || process.env.NODE_ENV === 'development';
 const MOCK_USERS_TOTAL = Number(process.env.MOCK_USERS_TOTAL || 50);
+const CORS_ALLOWED_ORIGINS = (process.env.CORS_ALLOWED_ORIGINS || 'http://localhost:4000')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const DB_SSL_REJECT_UNAUTHORIZED = process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false';
+const DB_SSL_CA = process.env.DB_SSL_CA ? process.env.DB_SSL_CA.replace(/\\n/g, '\n') : null;
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
   .split(',')
   .map((email) => email.trim().toLowerCase())
   .filter(Boolean);
 const DEFAULT_ADMIN_EMAILS = new Set(['alvarojesusmc@gmail.com']);
+const SELF_SERVICE_ROLES = new Set(['empresa', 'propietario', 'proveedor']);
+const asPositiveInt = (value, fallback) => {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+};
 
 if (!DATABASE_URL) {
   console.error('Missing DATABASE_URL. Set your Supabase Postgres connection string in environment variables.');
   process.exit(1);
 }
+if (!CLERK_SECRET_KEY) {
+  console.error('Missing CLERK_SECRET_KEY. Required to validate user tokens in the API.');
+  process.exit(1);
+}
+if (!CLERK_PUBLISHABLE_KEY) {
+  console.error('Missing CLERK_PUBLISHABLE_KEY. Required by Clerk middleware in backend.');
+  process.exit(1);
+}
+
+const isLocalDatabase =
+  DATABASE_URL.includes('localhost') ||
+  DATABASE_URL.includes('127.0.0.1') ||
+  DATABASE_URL.includes('@db.local');
 
 const pool = new Pool({
   connectionString: DATABASE_URL,
-  ssl: DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized: false },
+  ssl: isLocalDatabase
+    ? false
+    : DB_SSL_CA
+      ? { rejectUnauthorized: DB_SSL_REJECT_UNAUTHORIZED, ca: DB_SSL_CA }
+      : { rejectUnauthorized: DB_SSL_REJECT_UNAUTHORIZED },
 });
 
 const PROFILE_FIELDS = [
-  'clerk_user_id',
-  'role',
   'fullname',
   'email',
   'phone',
@@ -45,14 +82,111 @@ const PROFILE_FIELDS = [
   'energy_required',
 ];
 
-app.use(cors());
+const profileBodySchema = z.object({
+  role: z.enum(['empresa', 'propietario', 'proveedor']).optional(),
+  fullname: z.string().trim().min(1).max(120).optional(),
+  email: z.string().trim().email().max(254).optional(),
+  phone: z.string().trim().min(1).max(32).optional(),
+  company_name: z.string().trim().min(1).max(120).optional(),
+  tax_id: z.string().trim().min(1).max(32).optional(),
+  industry: z.string().trim().min(1).max(80).optional(),
+  location: z.string().trim().min(1).max(200).optional(),
+  size: z.string().trim().min(1).max(32).optional(),
+  type: z.string().trim().min(1).max(40).optional(),
+  services: z.string().trim().min(1).max(1000).optional(),
+  experience: z.string().trim().min(1).max(32).optional(),
+  activity_type: z.string().trim().min(1).max(120).optional(),
+  space_required: z.string().trim().min(1).max(32).optional(),
+  energy_required: z.string().trim().min(1).max(32).optional(),
+}).strict();
+
+const numericIdParamsSchema = z.object({
+  id: z.string().regex(/^\d+$/),
+}).strict();
+
+const clerkIdParamsSchema = z.object({
+  clerkUserId: z.string().trim().min(3).max(128).regex(/^[A-Za-z0-9_:-]+$/),
+}).strict();
+
+const apiLimiter = rateLimit({
+  windowMs: asPositiveInt(process.env.RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000),
+  limit: asPositiveInt(process.env.RATE_LIMIT_MAX, 200),
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  skip: (req) => req.originalUrl.startsWith('/api/webhooks/clerk'),
+  message: { error: 'Too many requests, try again later' },
+});
+
+const profileWriteLimiter = rateLimit({
+  windowMs: asPositiveInt(process.env.RATE_LIMIT_PROFILE_WINDOW_MS, 10 * 60 * 1000),
+  limit: asPositiveInt(process.env.RATE_LIMIT_PROFILE_MAX, 40),
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { error: 'Too many profile update requests' },
+});
+
+const adminMutationLimiter = rateLimit({
+  windowMs: asPositiveInt(process.env.RATE_LIMIT_ADMIN_WINDOW_MS, 10 * 60 * 1000),
+  limit: asPositiveInt(process.env.RATE_LIMIT_ADMIN_MAX, 30),
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { error: 'Too many admin mutation requests' },
+});
+
+const webhookLimiter = rateLimit({
+  windowMs: asPositiveInt(process.env.RATE_LIMIT_WEBHOOK_WINDOW_MS, 60 * 1000),
+  limit: asPositiveInt(process.env.RATE_LIMIT_WEBHOOK_MAX, 120),
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { error: 'Too many webhook requests' },
+});
+
+if (TRUST_PROXY === 'true') {
+  app.set('trust proxy', 1);
+} else if (/^\d+$/.test(String(TRUST_PROXY || ''))) {
+  app.set('trust proxy', Number(TRUST_PROXY));
+}
+
 app.use(
   bodyParser.json({
+    limit: '1mb',
     verify: (req, res, buf) => {
       req.rawBody = buf;
     },
   })
 );
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'none'"],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+  })
+);
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      if (CORS_ALLOWED_ORIGINS.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error('CORS origin denied'));
+    },
+    methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
+app.use('/api', apiLimiter);
+app.use(clerkMiddleware({ secretKey: CLERK_SECRET_KEY, publishableKey: CLERK_PUBLISHABLE_KEY }));
 
 app.get('/', (req, res) => {
   res.json({ message: 'Chancay Hub API is running', status: 'OK' });
@@ -101,8 +235,16 @@ const initializeDatabase = async () => {
 };
 
 const sanitizePayload = (body) => {
+  if (!body || typeof body !== 'object') return {};
+  const normalizedEntries = Object.entries(body).map(([key, value]) => [
+    key,
+    typeof value === 'string' ? value.trim() : value,
+  ]);
+
   return Object.fromEntries(
-    Object.entries(body).filter(([key, value]) => PROFILE_FIELDS.includes(key) && value !== undefined && value !== null && value !== '')
+    normalizedEntries.filter(([key, value]) =>
+      PROFILE_FIELDS.includes(key) && value !== undefined && value !== null && value !== ''
+    )
   );
 };
 
@@ -126,6 +268,177 @@ const normalizeEmail = (email) => String(email || '').trim().toLowerCase();
 const isAdminEmail = (email) => {
   const normalized = normalizeEmail(email);
   return DEFAULT_ADMIN_EMAILS.has(normalized) || ADMIN_EMAILS.includes(normalized);
+};
+
+const createHttpError = (status, message) => {
+  const error = new Error(message);
+  error.status = status;
+  error.expose = true;
+  return error;
+};
+
+const parseSchemaOrThrow = (schema, value, label) => {
+  const parsed = schema.safeParse(value);
+  if (parsed.success) return parsed.data;
+
+  const firstIssue = parsed.error.issues[0];
+  const issuePath = firstIssue?.path?.length ? firstIssue.path.join('.') : 'payload';
+  const issueMessage = firstIssue?.message || 'invalid value';
+  throw createHttpError(400, `Invalid ${label}: ${issuePath} ${issueMessage}`);
+};
+
+const sendApiError = (res, err, fallbackMessage) => {
+  const status = Number(err?.status || 0);
+  if (status >= 400 && status < 500 && err?.expose) {
+    return res.status(status).json({ error: err.message });
+  }
+  console.error(err);
+  return res.status(500).json({ error: fallbackMessage });
+};
+
+const validateBody = (schema) => (req, res, next) => {
+  try {
+    req.validatedBody = parseSchemaOrThrow(schema, req.body, 'request body');
+    return next();
+  } catch (err) {
+    return sendApiError(res, err, 'Invalid request body');
+  }
+};
+
+const validateParams = (schema) => (req, res, next) => {
+  try {
+    req.params = parseSchemaOrThrow(schema, req.params, 'request params');
+    return next();
+  } catch (err) {
+    return sendApiError(res, err, 'Invalid request params');
+  }
+};
+
+const requireApiAuth = (req, res, next) => {
+  const auth = getAuth(req);
+  if (!auth?.userId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  req.authUserId = auth.userId;
+  return next();
+};
+
+const attachRequester = async (req, res, next) => {
+  try {
+    const requester = await getUserByClerkId(req.authUserId);
+    if (!requester) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+    req.requester = requester;
+    return next();
+  } catch (err) {
+    return next(err);
+  }
+};
+
+const requireAdminRole = (req, res, next) => {
+  if (req.requester?.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  return next();
+};
+
+const requireSelfOrAdminByClerkId = (req, res, next) => {
+  if (req.requester?.role === 'admin' || req.params.clerkUserId === req.authUserId) {
+    return next();
+  }
+  return res.status(403).json({ error: 'Forbidden' });
+};
+
+const requireSelfOrAdminByNumericId = (req, res, next) => {
+  const requestedUserId = String(req.params.id || '');
+  if (!/^\d+$/.test(requestedUserId)) {
+    return res.status(400).json({ error: 'Invalid user id' });
+  }
+
+  if (req.requester?.role === 'admin' || String(req.requester?.id) === requestedUserId) {
+    return next();
+  }
+
+  return res.status(403).json({ error: 'Forbidden' });
+};
+
+const getVerifiedClerkEmail = async (clerkUserId) => {
+  const user = await clerkClient.users.getUser(clerkUserId);
+  const primary = user.emailAddresses.find(
+    (emailObj) => emailObj.id === user.primaryEmailAddressId
+  );
+  return normalizeEmail(primary?.emailAddress || '');
+};
+
+const upsertProfileForAuthUser = async (authUserId, body) => {
+  const payload = sanitizePayload(body);
+  payload.clerk_user_id = authUserId;
+  payload.email = await getVerifiedClerkEmail(authUserId);
+
+  if (!payload.email) {
+    throw createHttpError(400, 'email es obligatorio');
+  }
+
+  const existingByClerk = await getUserByClerkId(authUserId);
+  const requestedRole = normalizeEmail(body?.role);
+
+  if (existingByClerk) {
+    payload.role = existingByClerk.role;
+    if (existingByClerk.role !== 'admin' && isAdminEmail(payload.email)) {
+      payload.role = 'admin';
+    }
+
+    const updateFields = Object.keys(payload).filter((field) => field !== 'clerk_user_id');
+    if (!updateFields.length) {
+      return existingByClerk;
+    }
+
+    const setClause = updateFields.map((field, idx) => `${field} = $${idx + 1}`).join(', ');
+    const updateValues = updateFields.map((field) => payload[field]);
+
+    await pool.query(
+      `UPDATE users SET ${setClause} WHERE clerk_user_id = $${updateValues.length + 1}`,
+      [...updateValues, authUserId]
+    );
+    return getUserByClerkId(authUserId);
+  }
+
+  if (isAdminEmail(payload.email)) {
+    payload.role = 'admin';
+  } else {
+    if (!SELF_SERVICE_ROLES.has(requestedRole)) {
+      throw createHttpError(400, 'role inválido');
+    }
+    payload.role = requestedRole;
+  }
+
+  const existingByEmail = await getUserByEmail(payload.email);
+  if (existingByEmail) {
+    if (
+      existingByEmail.clerk_user_id &&
+      String(existingByEmail.clerk_user_id) !== String(authUserId)
+    ) {
+      throw createHttpError(409, 'El correo ya pertenece a otra cuenta');
+    }
+
+    const updateFields = Object.keys(payload);
+    const setClause = updateFields.map((field, idx) => `${field} = $${idx + 1}`).join(', ');
+    const updateValues = updateFields.map((field) => payload[field]);
+
+    await pool.query(
+      `UPDATE users SET ${setClause} WHERE id = $${updateValues.length + 1}`,
+      [...updateValues, existingByEmail.id]
+    );
+    return getUserById(existingByEmail.id);
+  }
+
+  const fields = Object.keys(payload);
+  const values = Object.values(payload);
+  const placeholders = fields.map((_, idx) => `$${idx + 1}`).join(', ');
+  const sql = `INSERT INTO users (${fields.join(',')}) VALUES (${placeholders}) RETURNING id`;
+  const insertResult = await pool.query(sql, values);
+  return getUserById(insertResult.rows[0].id);
 };
 
 const parseClerkPrimaryEmail = (evtData) => {
@@ -261,7 +574,7 @@ const ensureMockUsers = async () => {
   console.log(`Mock users ensured: ${MOCK_USERS_TOTAL}`);
 };
 
-app.post('/api/webhooks/clerk', async (req, res) => {
+app.post('/api/webhooks/clerk', webhookLimiter, async (req, res) => {
   try {
     if (!CLERK_WEBHOOK_SIGNING_SECRET) {
       return res.status(500).json({ error: 'Missing CLERK_WEBHOOK_SIGNING_SECRET' });
@@ -328,92 +641,40 @@ app.post('/api/webhooks/clerk', async (req, res) => {
 });
 
 // Endpoint de Registro
-app.post('/api/register', async (req, res) => {
+app.post('/api/register', profileWriteLimiter, requireApiAuth, validateBody(profileBodySchema), async (req, res) => {
   try {
-    const payload = sanitizePayload(req.body);
-    const fields = Object.keys(payload);
-    const values = Object.values(payload);
-
-    if (!fields.length) {
-      return res.status(400).json({ error: 'No hay datos para registrar' });
-    }
-
-    const placeholders = fields.map((_, idx) => `$${idx + 1}`).join(', ');
-    const sql = `INSERT INTO users (${fields.join(',')}) VALUES (${placeholders}) RETURNING id`;
-    const result = await pool.query(sql, values);
-    res.json({ message: 'success', id: result.rows[0].id });
+    const profile = await upsertProfileForAuthUser(req.authUserId, req.validatedBody);
+    return res.json({ message: 'success', id: profile.id });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return sendApiError(res, err, 'No se pudo registrar el perfil');
   }
 });
 
-app.post('/api/profile', async (req, res) => {
+app.post('/api/profile', profileWriteLimiter, requireApiAuth, validateBody(profileBodySchema), async (req, res) => {
   try {
-    const payload = sanitizePayload(req.body);
-
-    if (!payload.clerk_user_id || !payload.role || !payload.email) {
-      return res.status(400).json({ error: 'clerk_user_id, role y email son obligatorios' });
-    }
-    payload.email = normalizeEmail(payload.email);
-    if (isAdminEmail(payload.email)) {
-      payload.role = 'admin';
-    }
-
-    const fields = Object.keys(payload);
-    const values = Object.values(payload);
-    const existingByClerk = await getUserByClerkId(payload.clerk_user_id);
-
-    if (existingByClerk) {
-      const updateFields = fields.filter((field) => field !== 'clerk_user_id');
-      const setClause = updateFields.map((field, idx) => `${field} = $${idx + 1}`).join(', ');
-      const updateValues = updateFields.map((field) => payload[field]);
-
-      if (!setClause) {
-        return res.json({ message: 'success', data: existingByClerk });
-      }
-
-      await pool.query(
-        `UPDATE users SET ${setClause} WHERE clerk_user_id = $${updateValues.length + 1}`,
-        [...updateValues, payload.clerk_user_id]
-      );
-      const updatedUser = await getUserByClerkId(payload.clerk_user_id);
-      return res.json({ message: 'success', data: updatedUser });
-    }
-
-    const existingByEmail = await getUserByEmail(payload.email);
-    if (existingByEmail) {
-      const updateFields = fields;
-      const setClause = updateFields.map((field, idx) => `${field} = $${idx + 1}`).join(', ');
-      const updateValues = updateFields.map((field) => payload[field]);
-
-      await pool.query(
-        `UPDATE users SET ${setClause} WHERE id = $${updateValues.length + 1}`,
-        [...updateValues, existingByEmail.id]
-      );
-      const updatedUser = await getUserById(existingByEmail.id);
-      return res.json({ message: 'success', data: updatedUser });
-    }
-
-    const placeholders = fields.map((_, idx) => `$${idx + 1}`).join(', ');
-    const sql = `INSERT INTO users (${fields.join(',')}) VALUES (${placeholders})`;
-    const insertResult = await pool.query(`${sql} RETURNING id`, values);
-    const createdUser = await getUserById(insertResult.rows[0].id);
-    return res.json({ message: 'success', data: createdUser });
+    const profile = await upsertProfileForAuthUser(req.authUserId, req.validatedBody);
+    return res.json({ message: 'success', data: profile });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return sendApiError(res, err, 'No se pudo guardar el perfil');
   }
 });
 
-app.get('/api/users', async (req, res) => {
+app.get('/api/users', requireApiAuth, attachRequester, requireAdminRole, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM users ORDER BY created_at DESC');
-    res.json({ message: 'success', data: result.rows });
+    return res.json({ message: 'success', data: result.rows });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return sendApiError(res, err, 'No se pudieron listar los usuarios');
   }
 });
 
-app.get('/api/users/by-clerk/:clerkUserId', async (req, res) => {
+app.get(
+  '/api/users/by-clerk/:clerkUserId',
+  requireApiAuth,
+  attachRequester,
+  validateParams(clerkIdParamsSchema),
+  requireSelfOrAdminByClerkId,
+  async (req, res) => {
   try {
     const user = await getUserByClerkId(req.params.clerkUserId);
     if (!user) return res.status(404).json({ error: 'User not found' });
@@ -422,15 +683,22 @@ app.get('/api/users/by-clerk/:clerkUserId', async (req, res) => {
       const updated = await getUserById(user.id);
       return res.json({ message: 'success', data: updated });
     }
-    res.json({ message: 'success', data: user });
+    return res.json({ message: 'success', data: user });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return sendApiError(res, err, 'No se pudo recuperar el usuario');
   }
 });
 
-app.get('/api/matches/:id', async (req, res) => {
+app.get(
+  '/api/matches/:id',
+  requireApiAuth,
+  attachRequester,
+  validateParams(numericIdParamsSchema),
+  requireSelfOrAdminByNumericId,
+  async (req, res) => {
   try {
-    const user = await getUserById(req.params.id);
+    const isAdmin = req.requester?.role === 'admin';
+    const user = isAdmin ? await getUserById(req.params.id) : req.requester;
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     let query = '';
@@ -445,19 +713,34 @@ app.get('/api/matches/:id', async (req, res) => {
     }
 
     const result = await pool.query(query);
-    res.json({ message: 'success', data: result.rows });
+    return res.json({ message: 'success', data: result.rows });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return sendApiError(res, err, 'No se pudieron recuperar los matches');
   }
 });
 
-app.delete('/api/users/:id', async (req, res) => {
+app.delete(
+  '/api/users/:id',
+  adminMutationLimiter,
+  requireApiAuth,
+  attachRequester,
+  validateParams(numericIdParamsSchema),
+  requireAdminRole,
+  async (req, res) => {
   try {
     const result = await pool.query('DELETE FROM users WHERE id = $1', [req.params.id]);
-    res.json({ message: 'deleted', changes: result.rowCount });
+    return res.json({ message: 'deleted', changes: result.rowCount });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return sendApiError(res, err, 'No se pudo eliminar el usuario');
   }
+});
+
+app.use((err, req, res, next) => {
+  if (err && err.message === 'CORS origin denied') {
+    return res.status(403).json({ error: 'CORS origin denied' });
+  }
+  console.error(err);
+  return res.status(500).json({ error: 'Internal server error' });
 });
 
 initializeDatabase()

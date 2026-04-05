@@ -24,7 +24,6 @@ const RegistroPropietario = () => {
 
     const formData = new FormData(e.target as HTMLFormElement);
     const data = {
-      clerk_user_id: user.id,
       role: 'propietario',
       fullname: formData.get('fullname') || user.fullName || user.firstName,
       email: formData.get('email') || user.primaryEmailAddress?.emailAddress,

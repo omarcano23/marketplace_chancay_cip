@@ -24,7 +24,6 @@ const RegistroProveedor = () => {
 
     const formData = new FormData(e.target as HTMLFormElement);
     const data = {
-      clerk_user_id: user.id,
       role: 'proveedor',
       fullname: formData.get('fullname') || user.fullName || user.firstName,
       email: user.primaryEmailAddress?.emailAddress,

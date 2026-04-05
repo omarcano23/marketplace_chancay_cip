@@ -24,7 +24,6 @@ const RegistroEmpresa = () => {
 
     const formData = new FormData(e.target as HTMLFormElement);
     const data = {
-      clerk_user_id: user.id,
       role: 'empresa',
       fullname: user.fullName ?? user.firstName ?? 'Usuario Empresa',
       email: user.primaryEmailAddress?.emailAddress ?? '',

@@ -18,12 +18,42 @@ export interface AppUserProfile {
   energy_required?: string;
 }
 
-const API_BASE_URL = 'https://deep-data-api-chancayhub.kguo1f.easypanel.host';
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || 'https://deep-data-api-chancayhub.kguo1f.easypanel.host'
+).replace(/\/$/, '');
+
+const getClerkBearerToken = async (): Promise<string | null> => {
+  if (typeof window === 'undefined') return null;
+
+  const clerk = (window as any).Clerk;
+  if (!clerk?.session) return null;
+
+  try {
+    const token = await clerk.session.getToken();
+    return token || null;
+  } catch {
+    return null;
+  }
+};
+
+const apiFetch = async (path: string, init: RequestInit = {}) => {
+  const headers = new Headers(init.headers || {});
+  const token = await getClerkBearerToken();
+
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+
+  return fetch(`${API_BASE_URL}${path}`, {
+    ...init,
+    headers,
+  });
+};
 
 export const getDashboardPath = (role: AppRole) => `/dashboard/${role}`;
 
 export const fetchProfileByClerkId = async (clerkUserId: string): Promise<AppUserProfile | null> => {
-  const response = await fetch(`${API_BASE_URL}/api/users/by-clerk/${encodeURIComponent(clerkUserId)}`);
+  const response = await apiFetch(`/api/users/by-clerk/${encodeURIComponent(clerkUserId)}`);
   if (response.status === 404) return null;
   if (!response.ok) {
     throw new Error('No se pudo recuperar el perfil del usuario');
@@ -34,7 +64,7 @@ export const fetchProfileByClerkId = async (clerkUserId: string): Promise<AppUse
 };
 
 export const saveProfile = async (payload: Record<string, unknown>): Promise<AppUserProfile> => {
-  const response = await fetch(`${API_BASE_URL}/api/profile`, {
+  const response = await apiFetch('/api/profile', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -50,19 +80,19 @@ export const saveProfile = async (payload: Record<string, unknown>): Promise<App
 };
 
 export const fetchMatchesForUser = async (id: number): Promise<any[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/matches/${id}`);
+  const response = await apiFetch(`/api/matches/${id}`);
   if (!response.ok) return [];
   const data = await response.json();
   return data.message === 'success' ? data.data : [];
 };
 
 export const fetchAllUsers = async (): Promise<any[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/users`);
+  const response = await apiFetch('/api/users');
   if (!response.ok) return [];
   const data = await response.json();
   return data.data || [];
 };
 
 export const deleteUserById = async (id: number): Promise<void> => {
-  await fetch(`${API_BASE_URL}/api/users/${id}`, { method: 'DELETE' });
+  await apiFetch(`/api/users/${id}`, { method: 'DELETE' });
 };

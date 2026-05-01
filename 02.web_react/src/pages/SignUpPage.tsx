@@ -1,17 +1,14 @@
-import { SignUp } from '@clerk/react';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const SignUpPage = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark px-4">
-      <SignUp
-        path="/signup"
-        routing="path"
-        signInUrl="/login"
-        fallbackRedirectUrl="/registro"
-        forceRedirectUrl="/registro"
-      />
-    </div>
-  );
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate('/registro', { replace: true });
+  }, [navigate]);
+
+  return null;
 };
 
 export default SignUpPage;

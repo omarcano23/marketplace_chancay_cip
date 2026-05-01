@@ -36,7 +36,7 @@ const DashboardPropietario = () => {
       <div className="bg-white dark:bg-[#1e2532] rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-1 flex overflow-hidden">
         <div className="flex-1 p-6 flex flex-col justify-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wide border border-blue-200">Panel Propietario</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wide border border-primary/20">Panel Propietario</span>
             <span className="text-slate-400 text-xs">Ubicación: {user.location}</span>
           </div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Panel de Gestión: {user.fullname}</h2>
@@ -70,7 +70,7 @@ const DashboardPropietario = () => {
         </div>
 
         <div className="flex flex-col gap-6">
-          <StatCard title="Interesados" value={matches.length} icon="real_estate_agent" color="text-primary" bgColor="bg-blue-50" />
+          <StatCard title="Interesados" value={matches.length} icon="real_estate_agent" color="text-primary" bgColor="bg-primary/10" />
           <div className="bg-white dark:bg-[#1e2532] flex-1 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col p-5">
             <h3 className="font-bold text-slate-800 dark:text-white text-sm mb-4">Inversores Interesados</h3>
             <div className="flex flex-col gap-3">

@@ -45,7 +45,7 @@ const DashboardProveedor = () => {
       <div className="bg-white dark:bg-[#1e2532] rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-1 flex overflow-hidden">
         <div className="flex-1 p-6 flex flex-col justify-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wide border border-blue-200">Perfil de Servicio</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wide border border-primary/20">Perfil de Servicio</span>
             <span className="text-slate-400 text-xs">Especialidad: {user.industry}</span>
           </div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Panel de Proveedor: {user.fullname}</h2>
@@ -83,7 +83,7 @@ const DashboardProveedor = () => {
 
         <div className="flex flex-col gap-6">
           <div className="grid grid-cols-1 gap-4">
-            <StatCard title="Propuestas Enviadas" value="8" icon="send" color="text-primary" bgColor="bg-blue-50" />
+            <StatCard title="Propuestas Enviadas" value="8" icon="send" color="text-primary" bgColor="bg-primary/10" />
             <StatCard title="Proyectos Activos" value="2" icon="engineering" color="text-emerald-600" bgColor="bg-emerald-50" />
           </div>
         </div>

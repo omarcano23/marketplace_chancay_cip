@@ -10,7 +10,7 @@ const locations = [
     coords: { top: '25%', left: '20%' },
     description: "Hub principal automatizado para buques de gran calado.",
     stats: { capacidad: "1.5M TEU", calado: "17.8m" },
-    color: "bg-blue-500"
+    color: "bg-primary"
   },
   {
     id: 2,
@@ -40,14 +40,13 @@ const InteractiveMap = () => {
     <div className="font-display bg-background-light dark:bg-background-dark min-h-screen flex flex-col">
       {/* Header Estándar (Igual que LandingPage) */}
       <header className="sticky top-0 z-50 flex items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-10 py-4 shadow-sm">
-        <div className="flex items-center gap-4">
-          <Link to="/" className="size-8 flex items-center justify-center text-primary">
-            <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>anchor</span>
-          </Link>
-          <h2 className="text-gray-900 dark:text-white text-xl font-bold leading-tight tracking-tight">
-            Chancay Hub
-          </h2>
-        </div>
+        <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+          <img src="/cip-logo.png" alt="CIP" className="h-9 w-9 rounded-full object-cover flex-shrink-0" />
+          <div className="flex flex-col leading-none">
+            <span className="text-gray-900 dark:text-white text-base font-bold tracking-tight">Chancay Hub</span>
+            <span className="text-[10px] font-semibold text-primary uppercase tracking-wider">Colegio de Ingenieros del Perú</span>
+          </div>
+        </Link>
         <div className="flex flex-1 justify-end gap-8">
           <div className="hidden md:flex items-center gap-6">
             <Link to="/" className="text-gray-600 dark:text-gray-300 text-sm font-medium hover:text-primary transition-colors">Inicio</Link>
@@ -56,7 +55,7 @@ const InteractiveMap = () => {
           </div>
           <button 
             onClick={() => navigate('/login')}
-            className="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary hover:bg-blue-700 text-white text-sm font-bold transition-all shadow-md shadow-primary/20"
+            className="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary hover:bg-primary-dark text-white text-sm font-bold transition-all shadow-md shadow-primary/20"
           >
             Iniciar Sesión
           </button>
@@ -139,7 +138,7 @@ const InteractiveMap = () => {
                 </div>
 
                 <div className="mt-auto pt-4 flex flex-col gap-3">
-                  <Link to="/registro" className="bg-primary hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all text-center text-sm shadow-lg shadow-primary/20">
+                  <Link to="/registro" className="bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-xl transition-all text-center text-sm shadow-lg shadow-primary/20">
                     Registrar Interés
                   </Link>
                   <button className="text-primary text-xs font-bold hover:underline">Ver ficha técnica completa</button>

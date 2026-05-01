@@ -1,3 +1,5 @@
+import { devStore, DEV_MOCK_USERS, getDevMatchesForProfile } from './devStore';
+
 export type AppRole = 'admin' | 'empresa' | 'propietario' | 'proveedor';
 
 export interface AppUserProfile {
@@ -18,89 +20,44 @@ export interface AppUserProfile {
   energy_required?: string;
 }
 
-const DEFAULT_PROD_API_BASE_URL = 'https://deep-data-api-chancayhub.kguo1f.easypanel.host';
-const rawApiBaseUrl = String(import.meta.env.VITE_API_BASE_URL || '').trim();
-const isLoopbackUrl = /(^https?:\/\/)?(localhost|127\.0\.0\.1)(:\d+)?/i.test(rawApiBaseUrl);
-
-const API_BASE_URL = (
-  import.meta.env.PROD
-    ? rawApiBaseUrl && !isLoopbackUrl
-      ? rawApiBaseUrl
-      : DEFAULT_PROD_API_BASE_URL
-    : rawApiBaseUrl || 'http://localhost:4001'
-).replace(/\/$/, '');
-
-const getClerkBearerToken = async (): Promise<string | null> => {
-  if (typeof window === 'undefined') return null;
-
-  const clerk = (window as any).Clerk;
-  if (!clerk?.session) return null;
-
-  try {
-    const token = await clerk.session.getToken();
-    return token || null;
-  } catch {
-    return null;
-  }
-};
-
-const apiFetch = async (path: string, init: RequestInit = {}) => {
-  const headers = new Headers(init.headers || {});
-  const token = await getClerkBearerToken();
-
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
-
-  return fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers,
-  });
-};
-
 export const getDashboardPath = (role: AppRole) => `/dashboard/${role}`;
 
-export const fetchProfileByClerkId = async (clerkUserId: string): Promise<AppUserProfile | null> => {
-  const response = await apiFetch(`/api/users/by-clerk/${encodeURIComponent(clerkUserId)}`);
-  if (response.status === 404) return null;
-  if (!response.ok) {
-    throw new Error('No se pudo recuperar el perfil del usuario');
-  }
-
-  const data = await response.json();
-  return data.data ?? null;
-};
-
 export const saveProfile = async (payload: Record<string, unknown>): Promise<AppUserProfile> => {
-  const response = await apiFetch('/api/profile', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || 'No se pudo guardar el perfil');
-  }
-
-  const data = await response.json();
-  return data.data;
+  const str = (v: unknown) => (v != null && v !== '' ? String(v) : undefined);
+  const profile: AppUserProfile = {
+    id: Date.now(),
+    clerk_user_id: 'user-' + Date.now(),
+    role: (payload.role as AppRole) || 'empresa',
+    fullname: String(payload.fullname || 'Usuario'),
+    email: String(payload.email || 'usuario@local.pe'),
+    company_name: str(payload.company_name),
+    industry: str(payload.industry),
+    location: str(payload.location),
+    size: str(payload.size),
+    type: str(payload.type),
+    services: str(payload.services),
+    experience: str(payload.experience),
+    activity_type: str(payload.activity_type),
+    space_required: str(payload.space_required),
+    energy_required: str(payload.energy_required),
+  };
+  devStore.setProfile(profile);
+  return profile;
 };
 
-export const fetchMatchesForUser = async (id: number): Promise<any[]> => {
-  const response = await apiFetch(`/api/matches/${id}`);
-  if (!response.ok) return [];
-  const data = await response.json();
-  return data.message === 'success' ? data.data : [];
+export const fetchMatchesForUser = async (_id: number): Promise<any[]> => {
+  const profile = devStore.getProfile();
+  if (!profile) return [];
+  return getDevMatchesForProfile(profile);
 };
 
 export const fetchAllUsers = async (): Promise<any[]> => {
-  const response = await apiFetch('/api/users');
-  if (!response.ok) return [];
-  const data = await response.json();
-  return data.data || [];
+  const current = devStore.getProfile();
+  return current
+    ? [...DEV_MOCK_USERS, { ...current, created_at: new Date().toISOString() }]
+    : [...DEV_MOCK_USERS];
 };
 
-export const deleteUserById = async (id: number): Promise<void> => {
-  await apiFetch(`/api/users/${id}`, { method: 'DELETE' });
+export const deleteUserById = async (_id: number): Promise<void> => {
+  // no-op en modo frontend
 };

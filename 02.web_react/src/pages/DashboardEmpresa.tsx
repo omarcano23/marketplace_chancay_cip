@@ -70,7 +70,7 @@ const DashboardEmpresa = () => {
         </div>
 
         <div className="flex flex-col gap-6">
-          <StatCard title="Total Matches" value={matches.length} icon="hub" color="text-primary" bgColor="bg-blue-50" />
+          <StatCard title="Total Matches" value={matches.length} icon="hub" color="text-primary" bgColor="bg-primary/10" />
           <div className="bg-white dark:bg-[#1e2532] flex-1 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col p-5">
             <h3 className="font-bold text-slate-800 dark:text-white text-sm mb-4">Sugerencias del Sistema</h3>
             <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto">

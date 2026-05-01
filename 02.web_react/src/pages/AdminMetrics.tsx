@@ -44,7 +44,7 @@ const AdminMetrics = () => {
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <h3 className="font-bold dark:text-white mb-6">Distribución por Sector</h3>
           <div className="flex flex-col gap-4">
-            <ProgressRow label="Logística" value={65} color="bg-blue-500" />
+            <ProgressRow label="Logística" value={65} color="bg-primary" />
             <ProgressRow label="Inmobiliaria" value={45} color="bg-emerald-500" />
             <ProgressRow label="Ingeniería" value={30} color="bg-orange-500" />
             <ProgressRow label="Agroindustria" value={20} color="bg-indigo-500" />

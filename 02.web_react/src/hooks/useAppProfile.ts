@@ -1,62 +1,26 @@
-import { useUser } from '@clerk/react';
 import { useEffect, useState } from 'react';
-import { fetchProfileByClerkId, type AppUserProfile } from '../lib/authProfile';
-
-const profileCache = new Map<string, AppUserProfile | null>();
+import { type AppUserProfile } from '../lib/authProfile';
+import { devStore } from '../lib/devStore';
 
 export const useAppProfile = () => {
-  const { isLoaded, isSignedIn, user } = useUser();
-  const [profile, setProfileState] = useState<AppUserProfile | null>(null);
-  const [loadingProfile, setLoadingProfile] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [profile, setProfileState] = useState<AppUserProfile | null>(devStore.getProfile());
 
   useEffect(() => {
-    const load = async () => {
-      if (!isLoaded) return;
-
-      if (!isSignedIn || !user?.id) {
-        setProfileState(null);
-        setLoadingProfile(false);
-        return;
-      }
-
-      const cachedProfile = profileCache.get(user.id);
-      if (cachedProfile !== undefined) {
-        setProfileState(cachedProfile);
-        setLoadingProfile(false);
-        return;
-      }
-
-      setLoadingProfile(true);
-      setError(null);
-      try {
-        const data = await fetchProfileByClerkId(user.id);
-        profileCache.set(user.id, data);
-        setProfileState(data);
-      } catch (err: any) {
-        setError(err?.message || 'Error cargando perfil');
-      } finally {
-        setLoadingProfile(false);
-      }
-    };
-
-    load();
-  }, [isLoaded, isSignedIn, user?.id]);
+    return devStore.subscribe(() => setProfileState(devStore.getProfile()));
+  }, []);
 
   const setProfile = (nextProfile: AppUserProfile | null) => {
-    if (user?.id) {
-      profileCache.set(user.id, nextProfile);
-    }
+    devStore.setProfile(nextProfile);
     setProfileState(nextProfile);
   };
 
   return {
-    isLoaded,
-    isSignedIn,
-    clerkUser: user,
+    isLoaded: true,
+    isSignedIn: true as const,
+    clerkUser: null,
     profile,
-    loadingProfile,
-    error,
+    loadingProfile: false,
+    error: null,
     setProfile,
   };
 };

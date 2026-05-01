@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Show, UserButton } from '@clerk/react';
+import { useAppProfile } from '../hooks/useAppProfile';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -10,52 +10,53 @@ interface AuthLayoutProps {
   maxWidth?: string;
 }
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({ 
-  children, 
-  title, 
-  description, 
-  icon, 
+const AuthLayout: React.FC<AuthLayoutProps> = ({
+  children,
+  title,
+  description,
+  icon,
   roleTag,
   maxWidth = "max-w-[800px]"
 }) => {
   const navigate = useNavigate();
+  const { profile } = useAppProfile();
 
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden font-display">
       <div
         className="absolute inset-0 z-0 opacity-5 pointer-events-none"
         style={{
-          backgroundImage: 'radial-gradient(#1152d4 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(#E31E24 1px, transparent 1px)',
           backgroundSize: '32px 32px',
         }}
       ></div>
       
       <div className="layout-container flex h-full grow flex-col z-10 relative">
         <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-10 py-4 sticky top-0 z-50">
-          <div className="flex items-center gap-4 text-gray-900 dark:text-white">
-            <Link to="/" className="size-8 flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>anchor</span>
-            </Link>
-            <h2 className="text-gray-900 dark:text-white text-xl font-bold leading-tight tracking-tight">
-              Chancay Hub
-            </h2>
-          </div>
+          <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+            <img src="/cip-logo.png" alt="CIP" className="h-9 w-9 rounded-full object-cover flex-shrink-0" />
+            <div className="flex flex-col leading-none">
+              <span className="text-gray-900 dark:text-white text-base font-bold tracking-tight">Chancay Hub</span>
+              <span className="text-[10px] font-semibold text-primary uppercase tracking-wider">Colegio de Ingenieros del Perú</span>
+            </div>
+          </Link>
           <div className="flex flex-1 justify-end gap-8">
             <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-gray-300">
               <a className="hover:text-primary transition-colors" href="#">Ayuda</a>
               <a className="hover:text-primary transition-colors" href="#">Contacto</a>
             </div>
-            <Show when="signed-out">
-              <Link to="/login" className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white text-sm font-bold transition-colors">
-                <span className="truncate">Iniciar Sesión</span>
-              </Link>
-            </Show>
-            <Show when="signed-in">
+            {profile ? (
               <div className="flex items-center gap-3">
-                <UserButton />
-                <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Cuenta activa</span>
+                <div className="size-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold">
+                  {(profile.fullname || profile.company_name || 'U')[0].toUpperCase()}
+                </div>
+                <span className="text-sm font-bold text-gray-800 dark:text-gray-200 hidden sm:block">{profile.fullname || profile.company_name}</span>
               </div>
-            </Show>
+            ) : (
+              <Link to="/registro" className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white text-sm font-bold transition-colors">
+                <span className="truncate">Registrarse</span>
+              </Link>
+            )}
           </div>
         </header>
 
@@ -63,13 +64,13 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
           <div className={`layout-content-container flex flex-col ${maxWidth} flex-1 gap-8`}>
             <div className="flex flex-col gap-4 text-center items-center animate-fade-in-up">
               {roleTag && (
-                <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 dark:bg-blue-900/30 px-3 py-1 text-primary dark:text-blue-300 mb-2">
+                <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 dark:bg-primary/20 px-3 py-1 text-primary mb-2">
                   {icon && <span className="material-symbols-outlined text-sm">{icon}</span>}
                   <span className="text-xs font-bold uppercase tracking-wide">{roleTag}</span>
                 </div>
               )}
               {icon && !roleTag && (
-                <div className="size-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-primary mb-2">
+                <div className="size-16 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary mb-2">
                   <span className="material-symbols-outlined text-4xl">{icon}</span>
                 </div>
               )}

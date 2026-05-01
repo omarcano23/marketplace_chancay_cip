@@ -3,7 +3,6 @@ import Chatbot from '../components/Chatbot';
 import { useEffect } from 'react';
 import { getDashboardPath } from '../lib/authProfile';
 import { useAppProfile } from '../hooks/useAppProfile';
-import { Show, UserButton } from '@clerk/react';
 
 const SelectionPage = () => {
   const navigate = useNavigate();
@@ -29,7 +28,7 @@ const SelectionPage = () => {
       <div
         className="absolute inset-0 z-0 opacity-5 pointer-events-none"
         style={{
-          backgroundImage: 'radial-gradient(#1152d4 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(#E31E24 1px, transparent 1px)',
           backgroundSize: '32px 32px',
         }}
       ></div>
@@ -37,30 +36,21 @@ const SelectionPage = () => {
       <div className="layout-container flex h-full grow flex-col z-10 relative">
         {/* Top Navigation */}
         <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-10 py-4 sticky top-0 z-50">
-          <div className="flex items-center gap-4 text-gray-900 dark:text-white">
-            <div className="size-8 flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>anchor</span>
+          <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+            <img src="/cip-logo.png" alt="CIP" className="h-9 w-9 rounded-full object-cover flex-shrink-0" />
+            <div className="flex flex-col leading-none">
+              <span className="text-gray-900 dark:text-white text-base font-bold tracking-tight">Chancay Hub</span>
+              <span className="text-[10px] font-semibold text-primary uppercase tracking-wider">Colegio de Ingenieros del Perú</span>
             </div>
-            <h2 className="text-gray-900 dark:text-white text-xl font-bold leading-tight tracking-tight">
-              Chancay Hub
-            </h2>
-          </div>
+          </Link>
           <div className="flex flex-1 justify-end gap-8">
             <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-gray-300">
               <a className="hover:text-primary transition-colors" href="#">Ayuda</a>
               <a className="hover:text-primary transition-colors" href="#">Contacto</a>
             </div>
-            <Show when="signed-out">
-              <Link to="/login" className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white text-sm font-bold transition-colors">
-                <span className="truncate">Iniciar Sesión</span>
-              </Link>
-            </Show>
-            <Show when="signed-in">
-              <div className="flex items-center gap-3">
-                <UserButton />
-                <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Cuenta activa</span>
-              </div>
-            </Show>
+            <Link to="/" className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white text-sm font-bold transition-colors">
+              <span className="truncate">Inicio</span>
+            </Link>
           </div>
         </header>
 
@@ -69,6 +59,7 @@ const SelectionPage = () => {
           <div className="layout-content-container flex flex-col max-w-[1024px] flex-1 gap-12">
             {/* Page Heading */}
             <div className="flex flex-col gap-4 text-center items-center">
+              <img src="/cip-logo.png" alt="COLEGIO DE INGENIEROS DEL PERÚ" className="h-20 w-20 rounded-full object-cover shadow-lg shadow-primary/20" />
               <h1 className="text-gray-900 dark:text-white text-4xl md:text-5xl font-black leading-tight tracking-tight">
                 Selecciona tu Perfil para Continuar
               </h1>

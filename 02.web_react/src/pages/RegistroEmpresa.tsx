@@ -1,62 +1,43 @@
 import AuthLayout from '../components/AuthLayout';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@clerk/react';
 import { saveProfile } from '../lib/authProfile';
-import { useEffect } from 'react';
 import { useAppProfile } from '../hooks/useAppProfile';
 
 const RegistroEmpresa = () => {
   const navigate = useNavigate();
-  const { isLoaded, isSignedIn, user } = useUser();
   const { setProfile } = useAppProfile();
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    if (!isSignedIn) navigate('/signup');
-  }, [isLoaded, isSignedIn, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isSignedIn || !user?.id) {
-      navigate('/signup');
-      return;
-    }
-
     const formData = new FormData(e.target as HTMLFormElement);
-    const data = {
+    const companyName = String(formData.get('company_name') || '');
+
+    const profile = await saveProfile({
       role: 'empresa',
-      fullname: user.fullName ?? user.firstName ?? 'Usuario Empresa',
-      email: user.primaryEmailAddress?.emailAddress ?? '',
-      company_name: formData.get('company_name'),
+      fullname: companyName || 'Empresa',
+      email: `contacto@${companyName.toLowerCase().replace(/[^a-z0-9]/g, '') || 'empresa'}.pe`,
+      company_name: companyName,
       tax_id: formData.get('tax_id'),
       industry: formData.get('industry'),
       activity_type: formData.get('activity_type'),
       space_required: formData.get('space_required'),
-      energy_required: formData.get('energy_required')
-    };
+      energy_required: formData.get('energy_required'),
+    });
 
-    try {
-      const profile = await saveProfile(data);
-      setProfile(profile);
-      navigate('/dashboard/empresa');
-    } catch (error) {
-      console.error('Error registering:', error);
-      alert('Error al conectar con el servidor');
-    }
+    setProfile(profile);
+    navigate('/dashboard/empresa');
   };
 
-  if (!isLoaded || !isSignedIn) return null;
-
   return (
-    <AuthLayout 
-      title="Registro de Empresa Inversionista" 
+    <AuthLayout
+      title="Registro de Empresa Inversionista"
       description="Complete el perfil de su organización para acceder a oportunidades de inversión, terrenos industriales y alianzas estratégicas en el Puerto de Chancay."
       maxWidth="max-w-[960px]"
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-8">
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-3 pb-2 border-b border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-center size-8 rounded-full bg-blue-50 dark:bg-blue-900/30 text-primary font-bold text-sm">1</div>
+            <div className="flex items-center justify-center size-8 rounded-full bg-primary/10 dark:bg-primary/20 text-primary font-bold text-sm">1</div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">Datos de la Empresa</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -85,7 +66,7 @@ const RegistroEmpresa = () => {
 
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-3 pb-2 border-b border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-center size-8 rounded-full bg-blue-50 dark:bg-blue-900/30 text-primary font-bold text-sm">2</div>
+            <div className="flex items-center justify-center size-8 rounded-full bg-primary/10 dark:bg-primary/20 text-primary font-bold text-sm">2</div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">Intereses de Inversión</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -108,7 +89,7 @@ const RegistroEmpresa = () => {
           <button type="button" onClick={() => navigate('/registro')} className="px-6 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-bold text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
             Cancelar
           </button>
-          <button type="submit" className="px-6 py-2.5 rounded-lg bg-primary hover:bg-blue-700 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2">
+          <button type="submit" className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary-dark text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2">
             Registrar Empresa
             <span className="material-symbols-outlined text-sm">arrow_forward</span>
           </button>

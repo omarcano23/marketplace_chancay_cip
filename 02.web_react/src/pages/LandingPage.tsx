@@ -5,13 +5,12 @@ const LandingPage = () => {
   return (
     <div className="font-display bg-background-light dark:bg-background-dark text-[#111318] dark:text-white overflow-x-hidden min-h-screen flex flex-col">
       <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f2f4] dark:border-b-gray-800 bg-white dark:bg-[#101622] px-10 py-3 shadow-sm">
-        <div className="flex items-center gap-4 text-[#111318] dark:text-white">
-          <div className="size-8 flex items-center justify-center text-primary">
-            <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>anchor</span>
+        <div className="flex items-center gap-3 text-[#111318] dark:text-white">
+          <img src="/cip-logo.png" alt="CIP" className="h-9 w-9 rounded-full object-cover flex-shrink-0" />
+          <div className="flex flex-col leading-none">
+            <span className="text-[#111318] dark:text-white text-base font-bold tracking-tight">Chancay Hub</span>
+            <span className="text-[10px] font-semibold text-primary uppercase tracking-wider">Colegio de Ingenieros del Perú</span>
           </div>
-          <h2 className="text-[#111318] dark:text-white text-xl font-bold leading-tight tracking-[-0.015em]">
-            Chancay Hub
-          </h2>
         </div>
         <div className="flex flex-1 justify-end gap-8">
           <div className="hidden md:flex items-center gap-9">
@@ -25,7 +24,7 @@ const LandingPage = () => {
             </Link>
             <Link
               to="/signup"
-              className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-6 bg-primary hover:bg-blue-700 transition-colors text-white text-sm font-bold leading-normal tracking-[0.015em] shadow-md hover:shadow-lg"
+              className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-6 bg-primary hover:bg-primary-dark transition-colors text-white text-sm font-bold leading-normal tracking-[0.015em] shadow-md hover:shadow-lg"
             >
               <span className="truncate">Registrarse</span>
             </Link>
@@ -55,7 +54,7 @@ const LandingPage = () => {
               <div className="flex flex-col sm:flex-row gap-4 mt-4 justify-center md:justify-start">
                 <Link
                   to="/signup"
-                  className="flex min-w-[160px] cursor-pointer items-center justify-center rounded-lg h-12 px-8 bg-primary hover:bg-blue-600 text-white text-base font-bold transition-all shadow-lg hover:shadow-primary/50"
+                  className="flex min-w-[160px] cursor-pointer items-center justify-center rounded-lg h-12 px-8 bg-primary hover:bg-primary-dark text-white text-base font-bold transition-all shadow-lg hover:shadow-primary/50"
                 >
                   <span>Comenzar Ahora</span>
                   <span className="material-symbols-outlined ml-2" style={{ fontSize: '20px' }}>arrow_forward</span>
@@ -161,11 +160,11 @@ const LandingPage = () => {
           <div className="max-w-[1200px] mx-auto relative rounded-2xl overflow-hidden">
             <div className="absolute inset-0 bg-primary z-0"></div>
             <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] z-0"></div>
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-primary/50 z-0"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-[#2A2A29]/90 to-primary/60 z-0"></div>
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 p-10 md:p-16">
               <div className="flex flex-col gap-4 max-w-xl text-center md:text-left">
                 <h2 className="text-white text-3xl md:text-4xl font-bold leading-tight">¿Listo para ser parte del cambio?</h2>
-                <p className="text-blue-100 text-lg">Únete hoy a la comunidad empresarial más dinámica de la costa del Pacífico.</p>
+                <p className="text-white/80 text-lg">Únete hoy a la comunidad empresarial más dinámica de la costa del Pacífico.</p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/signup" className="bg-white text-primary hover:bg-gray-100 font-bold py-3 px-8 rounded-lg shadow-lg transition-transform hover:-translate-y-1 text-center">
@@ -184,11 +183,12 @@ const LandingPage = () => {
           <div className="max-w-[1200px] mx-auto px-6 md:px-10 lg:px-40 py-12 flex flex-col gap-10">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div className="flex flex-col gap-4 col-span-1 md:col-span-1">
-                <div className="flex items-center gap-2 text-[#111318] dark:text-white">
-                  <div className="size-6 flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined">anchor</span>
+                <div className="flex items-center gap-3 text-[#111318] dark:text-white">
+                  <img src="/cip-logo.png" alt="CIP" className="h-10 w-10 rounded-full object-cover flex-shrink-0" />
+                  <div className="flex flex-col leading-none">
+                    <h2 className="text-base font-bold">Chancay Hub</h2>
+                    <span className="text-[10px] font-semibold text-primary uppercase tracking-wider mt-0.5">CIP</span>
                   </div>
-                  <h2 className="text-lg font-bold">Chancay Hub</h2>
                 </div>
                 <p className="text-[#616f89] dark:text-gray-400 text-sm leading-relaxed">
                   Facilitando el comercio y la industria en el nuevo eje portuario de Sudamérica.
@@ -212,8 +212,12 @@ const LandingPage = () => {
             </div>
             <div className="h-px bg-[#f0f2f4] dark:bg-gray-800 w-full"></div>
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-              <p className="text-[#616f89] dark:text-gray-500 text-sm">© 2024 Chancay Hub. Todos los derechos reservados.</p>
-              <div className="flex gap-4">
+              <div className="flex flex-col gap-1">
+                <p className="text-[#616f89] dark:text-gray-500 text-sm">© 2024 Chancay Hub. Todos los derechos reservados.</p>
+                <p className="text-[#616f89] dark:text-gray-600 text-xs">Una iniciativa del <span className="font-semibold text-primary">COLEGIO DE INGENIEROS DEL PERÚ (CIP)</span></p>
+              </div>
+              <div className="flex items-center gap-4">
+                <img src="/cip-logo.png" alt="COLEGIO DE INGENIEROS DEL PERÚ" className="h-8 w-8 rounded-full object-cover opacity-70 hover:opacity-100 transition-opacity" />
                 <a className="text-[#616f89] dark:text-gray-400 hover:text-primary transition-colors" href="#">
                   <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>public</span>
                 </a>

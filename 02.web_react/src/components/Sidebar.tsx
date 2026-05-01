@@ -36,13 +36,15 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ role, userName, userCompany, menuItems, className = '', onNavigate }) => {
   return (
     <aside className={`w-72 bg-sidebar-bg flex flex-col h-full flex-shrink-0 text-white shadow-xl z-20 transition-all duration-300 ${className}`}>
-      <Link to="/" onClick={onNavigate} className="h-20 flex items-center px-6 gap-3 border-b border-white/10 hover:bg-white/5 transition-colors">
-        <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
-          <span className="material-symbols-outlined text-white">anchor</span>
-        </div>
-        <div className="flex flex-col">
-          <h1 className="text-base font-bold leading-none tracking-tight">Chancay Hub</h1>
-          <p className="text-xs text-slate-400 mt-1">Portal {role}s</p>
+      <Link to="/" onClick={onNavigate} className="h-20 flex items-center px-5 gap-3 border-b border-white/10 hover:bg-white/5 transition-colors">
+        <img
+          src="/cip-logo.png"
+          alt="CIP"
+          className="h-11 w-11 rounded-full flex-shrink-0 object-cover"
+        />
+        <div className="flex flex-col min-w-0">
+          <h1 className="text-sm font-bold leading-none tracking-tight text-white">Chancay Hub</h1>
+          <p className="text-[10px] text-gold mt-0.5 font-semibold uppercase tracking-wider leading-tight">CIP · Portal {role}s</p>
         </div>
       </Link>
 ...

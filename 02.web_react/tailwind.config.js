@@ -8,11 +8,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        "primary": "#135bec",
-        "primary-dark": "#0f4bc4",
+        "primary":          "#E31E24", // Rojo
+        "primary-dark":     "#C01820", // Rojo oscuro (hover)
+        "gold":             "#D7B56D", // Dorado
+        "gold-dark":        "#B8962A", // Dorado oscuro (hover)
         "background-light": "#f6f6f8",
-        "background-dark": "#101622",
-        "sidebar-bg": "#0f172a",
+        "background-dark":  "#1a1a19", // Oscuro cálido (páginas)
+        "sidebar-bg":       "#2A2A29", // Negro (sidebar)
       },
       fontFamily: {
         "display": ["Inter", "sans-serif"]

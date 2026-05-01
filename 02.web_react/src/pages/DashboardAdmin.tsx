@@ -41,7 +41,7 @@ const DashboardAdmin = () => {
     <Layout sidebarProps={getAdminSidebarProps('dashboard', adminUser.fullname)} currentPathLabel="Resumen Global">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
         <div className="md:col-span-2 flex flex-col gap-8">
-          <div className="bg-gradient-to-r from-primary to-blue-600 rounded-2xl p-5 md:p-8 text-white shadow-lg relative overflow-hidden">
+          <div className="bg-gradient-to-r from-[#2A2A29] to-primary rounded-2xl p-5 md:p-8 text-white shadow-lg relative overflow-hidden">
             <div className="relative z-10">
               <h2 className="text-2xl md:text-3xl font-bold mb-2">Bienvenido al Centro de Control</h2>
               <p className="opacity-90 max-w-md text-sm md:text-base">El Puerto de Chancay está creciendo. Tienes {allUsers.length} perfiles activos esperando vinculación.</p>
@@ -53,7 +53,7 @@ const DashboardAdmin = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <QuickStat title="Empresas Registradas" value={empresas} trend={`${Math.round((empresas / Math.max(allUsers.length, 1)) * 100)}% del total`} icon="apartment" color="text-blue-600" />
+            <QuickStat title="Empresas Registradas" value={empresas} trend={`${Math.round((empresas / Math.max(allUsers.length, 1)) * 100)}% del total`} icon="apartment" color="text-primary" />
             <StatCard title="Propietarios Registrados" value={propietarios} icon="landscape" color="text-emerald-600" />
             <StatCard title="Proveedores Registrados" value={proveedores} icon="engineering" color="text-orange-600" />
             <StatCard title="Total de Usuarios" value={allUsers.length} icon="groups" color="text-indigo-600" />
@@ -129,7 +129,7 @@ const StatCard = ({ title, value, icon, color }: any) => (
 
 const ActivityItem = ({ user, action, time, type }: any) => (
   <div className="flex gap-4 items-center">
-    <div className={`size-2 rounded-full ${type === 'empresa' ? 'bg-blue-500' : type === 'proveedor' ? 'bg-orange-500' : type === 'propietario' ? 'bg-emerald-500' : 'bg-indigo-500'}`}></div>
+    <div className={`size-2 rounded-full ${type === 'empresa' ? 'bg-primary/100' : type === 'proveedor' ? 'bg-orange-500' : type === 'propietario' ? 'bg-emerald-500' : 'bg-indigo-500'}`}></div>
     <div className="flex-1">
       <p className="text-sm font-bold dark:text-white">{user}</p>
       <p className="text-xs text-slate-500">{action}</p>
